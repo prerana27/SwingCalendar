@@ -7,9 +7,7 @@ import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -20,7 +18,7 @@ public class DefaultView extends JFrame {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(DefaultView.class);
     private JLabel statusLabel;
-    private JMenuBar menuBar;
+    private JMenuBar myMenuBar;
     private JMenu fileMenu, viewMenu;
     private JMenuItem exit, dayView, monthView;
     private ButtonGroup viewType;
@@ -43,6 +41,7 @@ public class DefaultView extends JFrame {
     DefaultView() {
         logger.info("Initializing Frame ..");
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.setTitle("Prerana's Calendar");
         this.setLayout(new BorderLayout());
 
         dayViewSelected = true;
@@ -60,12 +59,12 @@ public class DefaultView extends JFrame {
     }
 
     private void setMenuBar() {
-        menuBar = new JMenuBar();
+        myMenuBar = new JMenuBar();
 
-        menuBar.add(setFileMenu());
-        menuBar.add(setViewMenu());
+        myMenuBar.add(setFileMenu());
+        myMenuBar.add(setViewMenu());
 
-        this.setJMenuBar(menuBar);
+        this.setJMenuBar(myMenuBar);
     }
 
     private void setMainContent() {
@@ -193,6 +192,7 @@ public class DefaultView extends JFrame {
 
 
         westPanel.setLayout(new BoxLayout(westPanel, Y_AXIS));
+        westPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         westPanel.setBorder(BorderFactory.createTitledBorder("Navigation Pane"));
         westPanel.add(today);
         westPanel.add(prevNextPanel);
@@ -212,7 +212,7 @@ public class DefaultView extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statusLabel.setText(e.getActionCommand());
-                date = (isDayViewSelected()? date.minusDays(1) : date.minusMonths(1));
+                date = (isDayViewSelected() ? date.minusDays(1) : date.minusMonths(1));
                 updateDateDisplay();
             }
         });
@@ -221,8 +221,16 @@ public class DefaultView extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statusLabel.setText(e.getActionCommand());
-                date = (isDayViewSelected()? date.plusDays(1) : date.plusMonths(1));
+                date = (isDayViewSelected() ? date.plusDays(1) : date.plusMonths(1));
                 updateDateDisplay();
+            }
+        });
+
+        newEvent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                statusLabel.setText(e.getActionCommand());
+                new NewEventDialogue(date, statusLabel);
             }
         });
 
@@ -231,6 +239,7 @@ public class DefaultView extends JFrame {
 
     private JPanel setCenterPanel() {
         mainDisplay = new JPanel();
+        mainDisplay.setBorder(BorderFactory.createTitledBorder("Calendar"));
         mainDisplay.setLayout(new BoxLayout(mainDisplay, Y_AXIS));
 
         selectedView = new JLabel("Day view");
@@ -244,16 +253,16 @@ public class DefaultView extends JFrame {
         return mainDisplay;
     }
 
-    public void updateDateDisplay() {
-        logger.info("Current date is: {}, and view type is: {}", date.toString(), isDayViewSelected());
+    private void updateDateDisplay() {
+        logger.info("Current date is: {}, and view type is: {}", date, isDayViewSelected());
 
         displayDay.setText(date.format(dayFormat));
         displayDay.setVisible(isDayViewSelected());
 
-        if(isDayViewSelected()){
+        if (isDayViewSelected()) {
             selectedView.setText("Day View");
             displayDate.setText(date.format(dateMonthFormat));
-        }else{
+        } else {
             selectedView.setText("Month View");
             displayDate.setText(date.format(monthYearFormat));
         }
