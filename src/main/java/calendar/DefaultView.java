@@ -11,12 +11,13 @@ import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import static javax.swing.BoxLayout.X_AXIS;
 import static javax.swing.BoxLayout.Y_AXIS;
 
 public class DefaultView extends JFrame {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(DefaultView.class);
+    private static final int WEST_WIDTH = 250, APP_WIDTH = 600, APP_HEIGHT = 450, ICON_GAP = 15;
+    private String status = "Clicked on \"%s\"";
     private JLabel statusLabel;
     private JMenuBar myMenuBar;
     private JMenu fileMenu, viewMenu;
@@ -27,6 +28,7 @@ public class DefaultView extends JFrame {
     private JLabel selectedView, displayDay, displayDate;
     private LocalDate date;
     private DateTimeFormatter dateMonthFormat, dayFormat, monthYearFormat;
+    private Dimension small, medium;
 
     public boolean isDayViewSelected() {
         return dayViewSelected;
@@ -38,24 +40,34 @@ public class DefaultView extends JFrame {
 
     private boolean dayViewSelected;
 
-    DefaultView() {
-        logger.info("Initializing Frame ..");
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.setTitle("Prerana's Calendar");
-        this.setLayout(new BorderLayout());
-
+    private void init() {
         dayViewSelected = true;
         date = LocalDate.now();
         dateMonthFormat = DateTimeFormatter.ofPattern("dd MMMM yyy");
         dayFormat = DateTimeFormatter.ofPattern("EEEE");
         monthYearFormat = DateTimeFormatter.ofPattern("MMMM yyyy");
+        statusLabel = new JLabel("This space shows what actions are being performed");
+        statusLabel.setMinimumSize(new Dimension(APP_WIDTH, 20));
+        statusLabel.setVerticalTextPosition(SwingConstants.TOP);
+
+        small = new Dimension(100, 50);
+        medium = new Dimension(200, 50);
+    }
+
+    DefaultView() {
+        init();
+        logger.info("Initializing Frame ..");
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.setTitle("Prerana's Calendar");
+        this.setLayout(new BorderLayout(5, 5));
+
 
         setMenuBar();
         setMainContent();
 
-        statusLabel = new JLabel("This shows what actions are being performed");
         this.add(statusLabel, BorderLayout.SOUTH);
         this.pack();
+        this.setMinimumSize(new Dimension(APP_WIDTH, APP_HEIGHT));
     }
 
     private void setMenuBar() {
@@ -79,12 +91,13 @@ public class DefaultView extends JFrame {
             @Override
             public void menuSelected(MenuEvent e) {
                 logger.info("menuSelected :" + e.toString());
-                statusLabel.setText(String.format("Clicked on %s menu", fileMenu.getText()));
+                statusLabel.setText(String.format(status, fileMenu.getText()));
             }
 
             @Override
             public void menuDeselected(MenuEvent e) {
                 logger.info("menuDeselected :" + e.toString());
+                statusLabel.setText(String.format("%s was deselected.", fileMenu.getText()));
 
             }
 
@@ -103,7 +116,7 @@ public class DefaultView extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 logger.info("Exiting from Calendar via Menubar->File->Exit .. " + e.getActionCommand());
-                statusLabel.setText(e.getActionCommand());
+                statusLabel.setText(String.format(status, exit.getText()));
                 System.exit(0);
             }
         });
@@ -156,7 +169,7 @@ public class DefaultView extends JFrame {
             @Override
             public void menuSelected(MenuEvent e) {
                 logger.info("menuSelected :" + e.toString());
-                statusLabel.setText(String.format("Clicked on %s menu", viewMenu.getText()));
+                statusLabel.setText(String.format(status, viewMenu.getText()));
             }
 
             @Override
@@ -181,28 +194,55 @@ public class DefaultView extends JFrame {
     private JPanel setWestPanel() {
         westPanel = new JPanel();
         today = new JButton("Today");
-        left = new JButton("<");
-        right = new JButton(">");
-        newEvent = new JButton("+");
+        left = new JButton();
+        right = new JButton();
+        newEvent = new JButton("New Event");
 
         prevNextPanel = new JPanel();
-        prevNextPanel.setLayout(new BoxLayout(prevNextPanel, X_AXIS));
         prevNextPanel.add(left);
         prevNextPanel.add(right);
+        prevNextPanel.setMaximumSize(new Dimension(300, 50));
+        prevNextPanel.setAlignmentX(CENTER_ALIGNMENT);
+
+        ImageIcon todayIcon = new ImageIcon(getClass().getResource("/images/today.png"));
+        today.setIcon(todayIcon);
+        today.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
+        today.setMaximumSize(medium);
+        today.setIconTextGap(ICON_GAP);
+        today.setAlignmentX(CENTER_ALIGNMENT);
+
+        ImageIcon leftIcon = new ImageIcon(getClass().getResource("/images/left.png"));
+        left.setIcon(leftIcon);
+        left.setFont(new Font(Font.DIALOG, Font.PLAIN, 14));
+        left.setMaximumSize(small);
+
+
+        ImageIcon rightIcon = new ImageIcon(getClass().getResource("/images/right.png"));
+        right.setIcon(rightIcon);
+        right.setFont(new Font(Font.DIALOG, Font.PLAIN, 14));
+        right.setMaximumSize(small);
+
+
+        ImageIcon newIcon = new ImageIcon(getClass().getResource("/images/new.jpg"));
+        newEvent.setIcon(newIcon);
+        newEvent.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
+        newEvent.setMaximumSize(medium);
+        newEvent.setIconTextGap(ICON_GAP);
+        newEvent.setAlignmentX(CENTER_ALIGNMENT);
 
 
         westPanel.setLayout(new BoxLayout(westPanel, Y_AXIS));
-        westPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         westPanel.setBorder(BorderFactory.createTitledBorder("Navigation Pane"));
+        westPanel.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)));
         westPanel.add(today);
         westPanel.add(prevNextPanel);
         westPanel.add(newEvent);
-        westPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        westPanel.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)));
 
         today.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                statusLabel.setText(e.getActionCommand());
+                statusLabel.setText(String.format(status, today.getText()));
                 date = LocalDate.now();
                 updateDateDisplay();
             }
@@ -211,7 +251,7 @@ public class DefaultView extends JFrame {
         left.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                statusLabel.setText(e.getActionCommand());
+                statusLabel.setText(String.format(status, "Left"));
                 date = (isDayViewSelected() ? date.minusDays(1) : date.minusMonths(1));
                 updateDateDisplay();
             }
@@ -220,7 +260,7 @@ public class DefaultView extends JFrame {
         right.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                statusLabel.setText(e.getActionCommand());
+                statusLabel.setText(String.format(status, "Right"));
                 date = (isDayViewSelected() ? date.plusDays(1) : date.plusMonths(1));
                 updateDateDisplay();
             }
@@ -229,7 +269,7 @@ public class DefaultView extends JFrame {
         newEvent.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                statusLabel.setText(e.getActionCommand());
+                statusLabel.setText(String.format(status, newEvent.getText()));
                 new NewEventDialogue(date, statusLabel);
             }
         });
@@ -242,13 +282,26 @@ public class DefaultView extends JFrame {
         mainDisplay.setBorder(BorderFactory.createTitledBorder("Calendar"));
         mainDisplay.setLayout(new BoxLayout(mainDisplay, Y_AXIS));
 
-        selectedView = new JLabel("Day view");
-        displayDay = new JLabel(date.format(dayFormat));
-        displayDate = new JLabel(date.format(dateMonthFormat));
+        selectedView = new JLabel();
+        selectedView.setFont(new Font("Sans Serif", Font.BOLD, 24));
+        selectedView.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        displayDay = new JLabel();
+        displayDay.setFont(new Font("Sans Serif", Font.PLAIN, 18));
+        displayDay.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        displayDate = new JLabel();
+        displayDate.setFont(new Font("Sans Serif", Font.PLAIN, 22));
+        displayDate.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+        mainDisplay.add(Box.createVerticalStrut(20));
         mainDisplay.add(selectedView);
+        mainDisplay.add(Box.createVerticalStrut(20));
         mainDisplay.add(displayDay);
+        mainDisplay.add(Box.createVerticalStrut(20));
         mainDisplay.add(displayDate);
+        updateDateDisplay();
 
         return mainDisplay;
     }
