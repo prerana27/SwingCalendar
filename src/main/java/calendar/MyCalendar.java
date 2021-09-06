@@ -1,20 +1,16 @@
 package calendar;
 
-
-import ch.qos.logback.classic.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.swing.*;
+import java.util.logging.Logger;
 
 public class MyCalendar {
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(MyCalendar.class);
-
+    private static Logger logger = Logger.getLogger("calendar.MyCalendar");
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 logger.info("Starting my calendar ..");
-                DefaultView calendar = new DefaultView();
+                CalendarMainWindow calendar = new CalendarMainWindow();
                 calendar.setVisible(true);
             }
         });

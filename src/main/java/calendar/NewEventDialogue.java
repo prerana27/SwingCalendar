@@ -1,40 +1,40 @@
 package calendar;
 
-import ch.qos.logback.classic.Logger;
-import javafx.scene.control.DatePicker;
-import org.slf4j.LoggerFactory;
-
 import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDate;
+import java.util.logging.Logger;
 
 import static javax.swing.BoxLayout.Y_AXIS;
 
 public class NewEventDialogue extends JDialog {
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(NewEventDialogue.class);
+    private static Logger logger = Logger.getLogger("calendar.NewEventDialogue");
     private static final int TEXT_LEN = 15;
-    private static final String defaultName = "New Event", defaultStart = "18:00", defaultEnd = "18:30";
+    private static final String DEFAULT_NAME = "New Event", DEFAULT_START = "18:00", DEFAULT_END = "18:30";
     private JPanel basePanel, eventDetails, eventType, buttonsPanel;
-    private JLabel statusLabel, nameLabel, dateLable, startLabel, endLabel, separator;
+    private JLabel statusLabel, nameLabel, dateLable, startLabel, endLabel;
     private JTextField nameText, dateText, startText, endText;
     private LocalDate date;
     private JButton save, cancel;
     private Dimension labelSize;
 
     NewEventDialogue(LocalDate date, JLabel statusLabel) {
+        logger.info("Creating a new Dialogue box to add new event to the Calendar");
         this.date = date;
         this.statusLabel = statusLabel;
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         labelSize = new Dimension(80, 40);
-        separator = new JLabel("Select Categories for this event");
 
+        //panel that contains all other containers
         basePanel = new JPanel();
         basePanel.setLayout(new BoxLayout(basePanel, Y_AXIS));
+
         basePanel.add(addEventDetails());
         basePanel.add(addEventTypes());
         basePanel.add(addButtons());
+
         this.add(basePanel);
 
         this.pack();
@@ -42,6 +42,7 @@ public class NewEventDialogue extends JDialog {
         this.setVisible(true);
     }
 
+    //this adds the first part with the text fields
     private JPanel addEventDetails() {
         eventDetails = new JPanel();
         eventDetails.setLayout(new BoxLayout(eventDetails, Y_AXIS));
@@ -49,7 +50,7 @@ public class NewEventDialogue extends JDialog {
         JPanel namePanel = new JPanel();
         nameLabel = new JLabel("Name:");
         nameLabel.setMaximumSize(labelSize);
-        nameText = new JTextField(defaultName, TEXT_LEN);
+        nameText = new JTextField(DEFAULT_NAME, TEXT_LEN);
         nameText.setForeground(Color.GRAY);
         namePanel.add(nameLabel);
         namePanel.add(nameText);
@@ -65,7 +66,7 @@ public class NewEventDialogue extends JDialog {
         JPanel startPanel = new JPanel();
         startLabel = new JLabel("Start Time:");
         startLabel.setMaximumSize(labelSize);
-        startText = new JTextField(defaultStart, TEXT_LEN);
+        startText = new JTextField(DEFAULT_START, TEXT_LEN);
         startText.setForeground(Color.GRAY);
         startPanel.add(startLabel);
         startPanel.add(startText);
@@ -73,44 +74,45 @@ public class NewEventDialogue extends JDialog {
         JPanel endPanel = new JPanel();
         endLabel = new JLabel("End Time:");
         endLabel.setMaximumSize(labelSize);
-        endText = new JTextField(defaultEnd, TEXT_LEN);
+        endText = new JTextField(DEFAULT_END, TEXT_LEN);
         endText.setForeground(Color.GRAY);
         endPanel.add(endLabel);
         endPanel.add(endText);
 
+        //focus listener to have some responsive behavior with the text fields
         FocusListener focusListener = new FocusListener() {
-            Color setColorTo;
             @Override
             public void focusGained(FocusEvent e) {
-                setColorTo = Color.BLACK;
-                changeColor(e);
+                changeColor(e, Color.BLACK);
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                setColorTo = Color.GRAY;
-                changeColor(e);
+                changeColor(e, Color.GRAY);
             }
 
-            public void changeColor(FocusEvent e){
+            //when in focus, makes text black
+            //when out of focus makes text grey if text is the default text
+            public void changeColor(FocusEvent e, Color setColorTo){
                 Object src = e.getSource();
-                if (src.equals(nameText) && defaultName.equals(nameText.getText())) {
+                if (src.equals(nameText) && DEFAULT_NAME.equals(nameText.getText())) {
                     nameText.setForeground(setColorTo);
                     statusLabel.setText("Editing new event name");
                 } else if (src.equals(dateText) && date.toString().equals(dateText.getText())) {
                     dateText.setForeground(setColorTo);
                     statusLabel.setText("Editing new event date");
-                } else if (src.equals(startText) && defaultStart.equals(startText.getText())) {
+                } else if (src.equals(startText) && DEFAULT_START.equals(startText.getText())) {
                     startText.setForeground(setColorTo);
                     statusLabel.setText("Editing new event start time");
-                } else if (src.equals(endText) && defaultEnd.equals(endText.getText())) {
+                } else if (src.equals(endText) && DEFAULT_END.equals(endText.getText())) {
                     endText.setForeground(setColorTo);
                     statusLabel.setText("Editing new event end time");
                 }
+                logger.info(statusLabel.getText());
             }
         };
 
-        //adding interaction for text fields
+        //adding listeners for text fields
         nameText.addFocusListener(focusListener);
         dateText.addFocusListener(focusListener);
         startText.addFocusListener(focusListener);
@@ -123,6 +125,7 @@ public class NewEventDialogue extends JDialog {
         return eventDetails;
     }
 
+    //this adds the panel with the event type checkboxes
     private JPanel addEventTypes() {
         eventType = new JPanel();
 
@@ -137,7 +140,6 @@ public class NewEventDialogue extends JDialog {
                 Object source = e.getSource();
                 boolean isSelected = e.getStateChange() == ItemEvent.SELECTED;
 
-                logger.info(e.toString());
                 String s = "Selection for %s is %s";
                 String display;
                 if (source.equals(work)) {
@@ -153,6 +155,7 @@ public class NewEventDialogue extends JDialog {
                     display = String.format(s, health.getText(), isSelected);
                     statusLabel.setText(display);
                 }
+                logger.info(statusLabel.getText());
             }
         };
 
@@ -165,7 +168,6 @@ public class NewEventDialogue extends JDialog {
         eventType.add(vacation);
         eventType.add(family);
         eventType.add(health);
-
 
         return eventType;
     }
@@ -180,6 +182,7 @@ public class NewEventDialogue extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statusLabel.setText("Create new event dialog box cancelled.");
+                logger.info(statusLabel.getText());
                 NewEventDialogue.super.dispose();
             }
         });
@@ -188,6 +191,7 @@ public class NewEventDialogue extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statusLabel.setText(String.format("New Event created with title \"%s\" on %s during %s - %s", nameText.getText(), dateText.getText(), startText.getText(), endText.getText()));
+                logger.info(statusLabel.getText());
                 NewEventDialogue.super.dispose();
             }
         });
