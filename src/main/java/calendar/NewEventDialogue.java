@@ -1,10 +1,14 @@
 package calendar;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.logging.Logger;
 
 import static javax.swing.BoxLayout.Y_AXIS;
@@ -15,12 +19,14 @@ public class NewEventDialogue extends JDialog {
     private static final String DEFAULT_NAME = "New Event", DEFAULT_START = "18:00", DEFAULT_END = "18:30";
     private JPanel basePanel, eventDetails, eventType, buttonsPanel;
     private JLabel statusLabel, nameLabel, dateLable, startLabel, endLabel;
-    private JTextField nameText, dateText, startText, endText;
+    private JTextField nameText, dateText;
+    private JSpinner startTime, endTime;
     private LocalDate date;
     private JButton save, cancel;
     private Dimension labelSize;
 
     NewEventDialogue(LocalDate date, JLabel statusLabel) {
+        //setting up basic stuff for the dialogue box
         logger.info("Creating a new Dialogue box to add new event to the Calendar");
         this.date = date;
         this.statusLabel = statusLabel;
@@ -43,11 +49,12 @@ public class NewEventDialogue extends JDialog {
         this.setVisible(true);
     }
 
-    //this adds the first part with the text fields
+    //this adds the first part with the text fields and spinners for time selection
     private JPanel addEventDetails() {
         eventDetails = new JPanel();
         eventDetails.setLayout(new BoxLayout(eventDetails, Y_AXIS));
 
+        //this adds a label and a text field to a new panel to ensure Flow Layout
         JPanel namePanel = new JPanel();
         nameLabel = new JLabel("Name:");
         nameLabel.setMaximumSize(labelSize);
@@ -56,6 +63,7 @@ public class NewEventDialogue extends JDialog {
         namePanel.add(nameLabel);
         namePanel.add(nameText);
 
+        //this adds a label and a text field to a new panel to ensure Flow Layout
         JPanel datePanel = new JPanel();
         dateLable = new JLabel("Date:");
         dateLable.setMaximumSize(labelSize);
@@ -64,21 +72,25 @@ public class NewEventDialogue extends JDialog {
         datePanel.add(dateLable);
         datePanel.add(dateText);
 
+        //this adds a label and a JSpinner to a new panel to ensure Flow Layout
         JPanel startPanel = new JPanel();
-        startLabel = new JLabel("Start Time:");
+        startLabel = new JLabel("Start Time :");
         startLabel.setMaximumSize(labelSize);
-        startText = new JTextField(DEFAULT_START, TEXT_LEN);
-        startText.setForeground(Color.GRAY);
         startPanel.add(startLabel);
-        startPanel.add(startText);
+        //spinners to select start hour and minute
+        startTime = new JSpinner(new SpinnerDateModel());
+        startTime.setEditor(new JSpinner.DateEditor(startTime, "HH:mm"));
+        startPanel.add(startTime);
 
+        //this adds a label and a JSpinner to a new panel to ensure Flow Layout
         JPanel endPanel = new JPanel();
-        endLabel = new JLabel("End Time:");
+        endLabel = new JLabel("End Time :");
         endLabel.setMaximumSize(labelSize);
-        endText = new JTextField(DEFAULT_END, TEXT_LEN);
-        endText.setForeground(Color.GRAY);
         endPanel.add(endLabel);
-        endPanel.add(endText);
+        //spinners to select start hour and minute
+        endTime = new JSpinner(new SpinnerDateModel());
+        endTime.setEditor(new JSpinner.DateEditor(endTime, "HH:mm"));
+        endPanel.add(endTime);
 
         //focus listener to have some responsive behavior with the text fields
         FocusListener focusListener = new FocusListener() {
@@ -94,7 +106,7 @@ public class NewEventDialogue extends JDialog {
 
             //when in focus, makes text black
             //when out of focus makes text grey if text is the default text
-            public void changeColor(FocusEvent e, Color setColorTo){
+            public void changeColor(FocusEvent e, Color setColorTo) {
                 Object src = e.getSource();
                 if (src.equals(nameText) && DEFAULT_NAME.equals(nameText.getText())) {
                     nameText.setForeground(setColorTo);
@@ -102,12 +114,10 @@ public class NewEventDialogue extends JDialog {
                 } else if (src.equals(dateText) && date.toString().equals(dateText.getText())) {
                     dateText.setForeground(setColorTo);
                     statusLabel.setText("Editing new event date");
-                } else if (src.equals(startText) && DEFAULT_START.equals(startText.getText())) {
-                    startText.setForeground(setColorTo);
-                    statusLabel.setText("Editing new event start time");
-                } else if (src.equals(endText) && DEFAULT_END.equals(endText.getText())) {
-                    endText.setForeground(setColorTo);
-                    statusLabel.setText("Editing new event end time");
+                } else if (src.equals(startTime)) {
+                    statusLabel.setText("Editing new event's start time");
+                } else if (src.equals(endTime)) {
+                    statusLabel.setText("Editing new event's end time");
                 }
                 logger.info(statusLabel.getText());
             }
@@ -116,8 +126,22 @@ public class NewEventDialogue extends JDialog {
         //adding listeners for text fields
         nameText.addFocusListener(focusListener);
         dateText.addFocusListener(focusListener);
-        startText.addFocusListener(focusListener);
-        endText.addFocusListener(focusListener);
+
+        //change listener for the JSpinners - basically to update the status label for now
+        ChangeListener changeListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (e.getSource().equals(startTime)) {
+                    statusLabel.setText("Editing new event's start time to" + getTime(startTime));
+                } else if (e.getSource().equals(endTime)) {
+                    statusLabel.setText("Editing new event's end time to" + getTime(endTime));
+                }
+            }
+        };
+
+        //adding listener for the Spinners
+        startTime.addChangeListener(changeListener);
+        endTime.addChangeListener(changeListener);
 
         eventDetails.add(namePanel);
         eventDetails.add(datePanel);
@@ -135,6 +159,7 @@ public class NewEventDialogue extends JDialog {
         JCheckBox vacation = new JCheckBox("Vacation");
         JCheckBox health = new JCheckBox("Health");
 
+        //For now this listener is only used to update the status label
         ItemListener itemListener = new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -179,6 +204,7 @@ public class NewEventDialogue extends JDialog {
         save = new JButton("Save");
         cancel = new JButton("Cancel");
 
+        //action listener for the cancel button
         cancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -188,10 +214,11 @@ public class NewEventDialogue extends JDialog {
             }
         });
 
+        //action listener to show selected items on the status label
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                statusLabel.setText(String.format("New Event created with title \"%s\" on %s during %s - %s", nameText.getText(), dateText.getText(), startText.getText(), endText.getText()));
+                statusLabel.setText(String.format("New Event created with title \"%s\" on %s during %s - %s", nameText.getText(), dateText.getText(), getTime(startTime), getTime(endTime)));
                 logger.info(statusLabel.getText());
                 NewEventDialogue.super.dispose();
             }
@@ -200,5 +227,12 @@ public class NewEventDialogue extends JDialog {
         buttonsPanel.add(cancel);
         buttonsPanel.add(save);
         return buttonsPanel;
+    }
+
+    //utility to extract only Time from the value returned by JSpinner
+    private String getTime(JSpinner spinner) {
+        Date inputDate = (Date) spinner.getValue();
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+        return formatter.format(inputDate);
     }
 }

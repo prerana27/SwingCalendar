@@ -12,9 +12,9 @@ import java.util.logging.Logger;
 import static javax.swing.BoxLayout.Y_AXIS;
 
 public class CalendarMainWindow extends JFrame {
-    private static Logger logger = Logger.getLogger("calendar.CalendarMainWindow");
+    private static final Logger logger = Logger.getLogger("calendar.CalendarMainWindow");
     private static final int WEST_WIDTH = 250, APP_WIDTH = 600, APP_HEIGHT = 450, ICON_GAP = 15;
-    private String status = "Clicked on \"%s\"";
+    private static final String status = "Clicked on \"%s\"";
     private JLabel statusLabel;
     private JMenuBar myMenuBar;
     private JMenu fileMenu, viewMenu;
@@ -26,17 +26,16 @@ public class CalendarMainWindow extends JFrame {
     private LocalDate date;
     private DateTimeFormatter dateMonthFormat, dayFormat, monthYearFormat;
     private Dimension smallButton, mediumButton;
+    private boolean dayViewSelected;
 
     public boolean isDayViewSelected() {
         return dayViewSelected;
     }
-
     public void setDayViewSelected(boolean dayViewSelected) {
         this.dayViewSelected = dayViewSelected;
     }
 
-    private boolean dayViewSelected;
-
+    //initializing some variables
     private void init() {
         //this is toggled on/off to keep track of which view is selected from menu
         dayViewSelected = true;
@@ -222,7 +221,7 @@ public class CalendarMainWindow extends JFrame {
         prevNextPanel.setMaximumSize(new Dimension(300, 50));
         prevNextPanel.setAlignmentX(CENTER_ALIGNMENT);
 
-        //attempt to beautify buttons with icons :)
+        //attempt to "beautify" buttons with icons
         beautifyButtons();
 
         westPanel.setLayout(new BoxLayout(westPanel, Y_AXIS));
