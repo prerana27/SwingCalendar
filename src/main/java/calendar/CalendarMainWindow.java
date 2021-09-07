@@ -1,6 +1,5 @@
 package calendar;
 
-
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -308,29 +307,35 @@ public class CalendarMainWindow extends JFrame {
     }
 
     private JPanel setCenterPanel() {
+        //this is the panel that contains everything in the Center part of Border Layout
         mainDisplay = new JPanel();
         mainDisplay.setBorder(BorderFactory.createTitledBorder("Calendar"));
         mainDisplay.setLayout(new BoxLayout(mainDisplay, Y_AXIS));
 
+        //Label to display selected view
         selectedView = new JLabel();
         selectedView.setFont(new Font("Sans Serif", Font.BOLD, 24));
         selectedView.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        //label to disaply the day of week for day view
         displayDay = new JLabel();
         displayDay.setFont(new Font("Sans Serif", Font.PLAIN, 18));
         displayDay.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        //label to display either day view date ot month view month
         displayDate = new JLabel();
         displayDate.setFont(new Font("Sans Serif", Font.PLAIN, 22));
         displayDate.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-
+        //adding them to the main panel
         mainDisplay.add(Box.createVerticalStrut(20));
         mainDisplay.add(selectedView);
         mainDisplay.add(Box.createVerticalStrut(20));
         mainDisplay.add(displayDay);
         mainDisplay.add(Box.createVerticalStrut(20));
         mainDisplay.add(displayDate);
+
+        //setting default day view text in the labels
         updateDateDisplay();
 
         return mainDisplay;

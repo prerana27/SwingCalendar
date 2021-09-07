@@ -31,6 +31,7 @@ public class NewEventDialogue extends JDialog {
         basePanel = new JPanel();
         basePanel.setLayout(new BoxLayout(basePanel, Y_AXIS));
 
+        //adding different parts of this dialogue box
         basePanel.add(addEventDetails());
         basePanel.add(addEventTypes());
         basePanel.add(addButtons());
