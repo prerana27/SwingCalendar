@@ -1,0 +1,2 @@
+https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html
+https://learning.oreilly.com/library/view/learning-java-4th/9781449372477/ch18s06.html#learnjava3-CHP-18-SECT-6.2
