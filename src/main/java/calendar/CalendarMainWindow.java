@@ -1,11 +1,13 @@
 package calendar;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 
@@ -13,7 +15,7 @@ import static javax.swing.BoxLayout.Y_AXIS;
 
 public class CalendarMainWindow extends JFrame {
     private static final Logger logger = Logger.getLogger("calendar.CalendarMainWindow");
-    private static final int WEST_WIDTH = 250, APP_WIDTH = 600, APP_HEIGHT = 450, ICON_GAP = 15;
+    public static final int WEST_WIDTH = 250, APP_WIDTH = 1090, APP_HEIGHT = 680, ICON_GAP = 15;
     private static final String status = "Clicked on \"%s\"";
     private JLabel statusLabel;
     private JMenuBar myMenuBar;
@@ -27,6 +29,8 @@ public class CalendarMainWindow extends JFrame {
     private DateTimeFormatter dateMonthFormat, dayFormat, monthYearFormat;
     private Dimension smallButton, mediumButton;
     private boolean dayViewSelected;
+    private DayViewComponent dayViewComponent;
+    private JScrollPane dayViewScrollPane;
 
     public boolean isDayViewSelected() {
         return dayViewSelected;
@@ -44,10 +48,12 @@ public class CalendarMainWindow extends JFrame {
         date = LocalDate.now();
         dayFormat = DateTimeFormatter.ofPattern("EEEE");
         monthYearFormat = DateTimeFormatter.ofPattern("MMMM yyyy");
-        dateMonthFormat = DateTimeFormatter.ofPattern("dd MMMM yyy");
+        dateMonthFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
         statusLabel = new JLabel("This space shows what actions are being performed");
         statusLabel.setMinimumSize(new Dimension(APP_WIDTH, 20));
         statusLabel.setVerticalTextPosition(SwingConstants.TOP);
+
+        dayViewComponent = new DayViewComponent(date);
 
         smallButton = new Dimension(100, 50);
         mediumButton = new Dimension(200, 50);
@@ -82,6 +88,7 @@ public class CalendarMainWindow extends JFrame {
 
         //add "View" menu to the menu bar
         myMenuBar.add(setViewMenu());
+        myMenuBar.setBorder(null);
 
         this.setJMenuBar(myMenuBar);
     }
@@ -220,12 +227,13 @@ public class CalendarMainWindow extends JFrame {
         prevNextPanel.add(right);
         prevNextPanel.setMaximumSize(new Dimension(300, 50));
         prevNextPanel.setAlignmentX(CENTER_ALIGNMENT);
+        prevNextPanel.setBackground(Color.WHITE);
 
         //attempt to "beautify" buttons with icons
         beautifyButtons();
 
         westPanel.setLayout(new BoxLayout(westPanel, Y_AXIS));
-        westPanel.setBorder(BorderFactory.createTitledBorder("Navigation Pane"));
+        westPanel.setBackground(Color.WHITE);
 
         //dont know of a better way to create empty space between the title of panel and next container
         westPanel.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)));
@@ -308,31 +316,39 @@ public class CalendarMainWindow extends JFrame {
     private JPanel setCenterPanel() {
         //this is the panel that contains everything in the Center part of Border Layout
         mainDisplay = new JPanel();
-        mainDisplay.setBorder(BorderFactory.createTitledBorder("Calendar"));
         mainDisplay.setLayout(new BoxLayout(mainDisplay, Y_AXIS));
 
         //Label to display selected view
         selectedView = new JLabel();
-        selectedView.setFont(new Font("Sans Serif", Font.BOLD, 24));
-        selectedView.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        //label to disaply the day of week for day view
-        displayDay = new JLabel();
-        displayDay.setFont(new Font("Sans Serif", Font.PLAIN, 18));
-        displayDay.setAlignmentX(Component.CENTER_ALIGNMENT);
+        selectedView.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        selectedView.setForeground(Color.GRAY);
+        selectedView.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         //label to display either day view date ot month view month
         displayDate = new JLabel();
-        displayDate.setFont(new Font("Sans Serif", Font.PLAIN, 22));
-        displayDate.setAlignmentX(Component.CENTER_ALIGNMENT);
+        displayDate.setFont(new Font("SansSerif", Font.BOLD, 26));
+        displayDate.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        //label to disaply the day of week for day view
+        displayDay = new JLabel();
+        displayDay.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        displayDay.setAlignmentX(Component.LEFT_ALIGNMENT);
+
 
         //adding them to the main panel
-        mainDisplay.add(Box.createVerticalStrut(20));
+        mainDisplay.add(Box.createVerticalStrut(5));
         mainDisplay.add(selectedView);
-        mainDisplay.add(Box.createVerticalStrut(20));
-        mainDisplay.add(displayDay);
-        mainDisplay.add(Box.createVerticalStrut(20));
+        mainDisplay.add(Box.createVerticalStrut(9));
         mainDisplay.add(displayDate);
+        mainDisplay.add(Box.createVerticalStrut(5));
+        mainDisplay.add(displayDay);
+
+        dayViewScrollPane = new JScrollPane(dayViewComponent);
+        dayViewScrollPane.setPreferredSize(dayViewComponent.getMinimumSize());
+        dayViewScrollPane.setBorder(null);
+
+        mainDisplay.add(dayViewScrollPane);
+        mainDisplay.setBackground(Color.WHITE);
 
         //setting default day view text in the labels
         updateDateDisplay();
@@ -345,6 +361,7 @@ public class CalendarMainWindow extends JFrame {
 
         displayDay.setText(date.format(dayFormat));
         displayDay.setVisible(isDayViewSelected());
+        dayViewScrollPane.setVisible(isDayViewSelected());
 
         //using the boolean from radio buttons to determine what labels to show and what date format to use
         if (isDayViewSelected()) {
