@@ -345,6 +345,7 @@ public class CalendarMainWindow extends JFrame {
 
         dayViewScrollPane = new JScrollPane(dayViewComponent);
         dayViewScrollPane.setPreferredSize(dayViewComponent.getMinimumSize());
+        dayViewScrollPane.getVerticalScrollBar().setUnitIncrement(10);
         dayViewScrollPane.setBorder(null);
 
         mainDisplay.add(dayViewScrollPane);
