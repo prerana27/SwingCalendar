@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -34,16 +35,8 @@ public class DayViewComponent extends JComponent {
         this.currentDate = localDate;
         timeFont = new Font("SansSerif", Font.PLAIN, 14);
 
-        addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                logger.info(String.format("mousePressed at %s which is %s", e.getY(), getPosnToTime(e.getY())));
-            }
-        });
-        addMouseMotionListener(new MouseMotionAdapter() {
-            public void mouseDragged(MouseEvent e) {
-                logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
-            }
-        });
+        addMouseListener(new ClickListener());
+        addMouseMotionListener(new DragListener());
 
         this.setMinimumSize(new Dimension(COMPONENT_WIDTH, COMPONENT_HEIGHT));
         this.setSize(new Dimension(COMPONENT_WIDTH, COMPONENT_MAX_HEIGHT));
@@ -88,5 +81,17 @@ public class DayViewComponent extends JComponent {
         int y = HEADER_Y1 + time.getHour() * TIME_BOX_HEIGHT;
         logger.info(String.format("%s converts to %s", time.toString(), y));
         return y;
+    }
+
+    private class ClickListener extends MouseAdapter {
+        public void mousePressed(MouseEvent e) {
+            logger.info(String.format("mousePressed at %s which is %s", e.getY(), getPosnToTime(e.getY())));
+        }
+    }
+
+    private class DragListener extends MouseMotionAdapter {
+        public void mouseDragged(MouseEvent e) {
+            logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
+        }
     }
 }

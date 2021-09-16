@@ -1,0 +1,12 @@
+
+j	java:S116"URename this field "START_TIME" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Êµû‰
+F
+java:S1948"+Make "eventsMap" transient or serializable.(ƒÜˆ¿ùÿÿÿÿ
+U
+java:S1161&":Add the "@Override" annotation above this method signature(®î’×üÿÿÿÿ
+O
+java:S1161+":Add the "@Override" annotation above this method signature(®—ËF
+L
+java:S1068"/Remove this unused "currentDate" private field.(ŽŽò”8ÿ€ÒÙ¾/
+H
+java:S1068"-Remove this unused "eventsMap" private field.(ƒÜˆ¿ùÿÿÿÿ

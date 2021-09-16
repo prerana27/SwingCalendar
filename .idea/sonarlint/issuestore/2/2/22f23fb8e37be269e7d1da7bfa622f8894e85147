@@ -1,0 +1,57 @@
+
+A
+java:S1659"+Declare "DEFAULT_START" on a separate line.(ÿëµ‹
+?
+java:S1659")Declare "DEFAULT_END" on a separate line.(ÿëµ‹
+@
+java:S1659"*Declare "eventDetails" on a separate line.( Ç
+=
+java:S1659"'Declare "eventType" on a separate line.( Ç
+@
+java:S1659"*Declare "buttonsPanel" on a separate line.( Ç
+=
+java:S1659"'Declare "nameLabel" on a separate line.( á—á
+=
+java:S1659"'Declare "dateLable" on a separate line.( á—á
+>
+java:S1659"(Declare "startLabel" on a separate line.( á—á
+<
+java:S1659"&Declare "endLabel" on a separate line.( á—á
+A
+java:S1659"&Declare "dateText" on a separate line.(ŽÈÑÙüÿÿÿÿ
+:
+java:S1659"%Declare "endTime" on a separate line.(Š¹Ón
+:
+java:S1659"$Declare "cancel" on a separate line.(ÔÁ›•
+q
+java:S1450"[Remove the "buttonsPanel" field and declare it as a local variable in the relevant methods.( Ç
+k
+java:S1450"URemove the "cancel" field and declare it as a local variable in the relevant methods.(ÔÁ›•
+n
+java:S1450"XRemove the "dateLable" field and declare it as a local variable in the relevant methods.( á—á
+m
+java:S1450"WRemove the "endLabel" field and declare it as a local variable in the relevant methods.( á—á
+q
+java:S1450"[Remove the "eventDetails" field and declare it as a local variable in the relevant methods.( Ç
+n
+java:S1450"XRemove the "eventType" field and declare it as a local variable in the relevant methods.( Ç
+n
+java:S1450"XRemove the "nameLabel" field and declare it as a local variable in the relevant methods.( á—á
+i
+java:S1450"SRemove the "save" field and declare it as a local variable in the relevant methods.(ÔÁ›•
+o
+java:S1450"YRemove the "startLabel" field and declare it as a local variable in the relevant methods.( á—á
+G
+java:S1068"1Remove this unused "DEFAULT_START" private field.(ÿëµ‹
+E
+java:S1068"/Remove this unused "DEFAULT_END" private field.(ÿëµ‹
+\
+java:S1192R"FDefine a constant instead of duplicating this literal "HH:mm" 3 times.(¼å¶¦
+D
+java:S1604ƒ"(Make this anonymous inner class a lambda(õ ¢¥üÿÿÿÿ
+D
+java:S1604£"(Make this anonymous inner class a lambda(ë•ìÐúÿÿÿÿ
+?
+java:S1604Ð"(Make this anonymous inner class a lambda(Ã¼‹—
+D
+java:S1604Ú"(Make this anonymous inner class a lambda(Ø¬ëêÿÿÿÿÿ

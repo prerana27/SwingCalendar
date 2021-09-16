@@ -1,0 +1,71 @@
+
+n	java:S115"ZRename this constant name to match the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'.(Ë¨¸t
+B
+java:S1659"'Declare "APP_WIDTH" on a separate line.(¿€®ïøÿÿÿÿ
+C
+java:S1659"(Declare "APP_HEIGHT" on a separate line.(¿€®ïøÿÿÿÿ
+A
+java:S1659"&Declare "ICON_GAP" on a separate line.(¿€®ïøÿÿÿÿ
+<
+java:S1659"&Declare "viewMenu" on a separate line.(ªæ¹
+@
+java:S1659"%Declare "dayView" on a separate line.(„Òï³øÿÿÿÿ
+B
+java:S1659"'Declare "monthView" on a separate line.(„Òï³øÿÿÿÿ
+A
+java:S1659"+Declare "prevNextPanel" on a separate line.(ëÈ¶é
+?
+java:S1659")Declare "mainDisplay" on a separate line.(ëÈ¶é
+=
+java:S1659""Declare "left" on a separate line.(İ—Íşÿÿÿÿ
+>
+java:S1659"#Declare "right" on a separate line.(İ—Íşÿÿÿÿ
+A
+java:S1659"&Declare "newEvent" on a separate line.(İ—Íşÿÿÿÿ
+>
+java:S1659"(Declare "displayDay" on a separate line.(óíúÕ
+?
+java:S1659")Declare "displayDate" on a separate line.(óíúÕ
+B
+java:S1659"'Declare "dayFormat" on a separate line.(¨¢‡Øÿÿÿÿÿ
+H
+java:S1659"-Declare "monthYearFormat" on a separate line.(¨¢‡Øÿÿÿÿÿ
+E
+java:S1659"*Declare "mediumButton" on a separate line.(áÙ¥Öüÿÿÿÿ
+p
+java:S1450"ZRemove the "mainDisplay" field and declare it as a local variable in the relevant methods.(ëÈ¶é
+s
+java:S1450"XRemove the "myMenuBar" field and declare it as a local variable in the relevant methods.(ÉÓ¨Œıÿÿÿÿ
+r
+java:S1450"\Remove the "prevNextPanel" field and declare it as a local variable in the relevant methods.(ëÈ¶é
+r
+java:S1450"WRemove the "viewType" field and declare it as a local variable in the relevant methods.(×‘¶ûÿÿÿÿ
+n
+java:S1450"XRemove the "westPanel" field and declare it as a local variable in the relevant methods.(ëÈ¶é
+L
+java:S1948"1Make "dateMonthFormat" transient or serializable.(¨¢‡Øÿÿÿÿÿ
+F
+java:S1948"+Make "dayFormat" transient or serializable.(¨¢‡Øÿÿÿÿÿ
+L
+java:S1948"1Make "monthYearFormat" transient or serializable.(¨¢‡Øÿÿÿÿÿ
+]
+java:S1128";Remove this unused import 'javax.swing.border.EmptyBorder'.(ÿÍ“ûÿÿÿÿ8…ƒ³á¾/
+R
+java:S1128
+"0Remove this unused import 'java.time.LocalTime'.(à®øÃùÿÿÿÿ8‰ƒ³á¾/
+f
+java:S1192Ã"JDefine a constant instead of duplicating this literal "SansSerif" 3 times.(µÒÖæøÿÿÿÿ
+?
+java:S1604„"(Make this anonymous inner class a lambda(¯ı©
+?
+java:S1604¨"(Make this anonymous inner class a lambda(ÏÄ«Ö
+D
+java:S1604²"(Make this anonymous inner class a lambda(ô¥êìûÿÿÿÿ
+?
+java:S1604õ"(Make this anonymous inner class a lambda(‚©Şè
+D
+java:S1604ÿ"(Make this anonymous inner class a lambda(’úƒÊûÿÿÿÿ
+D
+java:S1604‰"(Make this anonymous inner class a lambda(Ë“Šëÿÿÿÿÿ
+?
+java:S1604“"(Make this anonymous inner class a lambda(×‚¯°
