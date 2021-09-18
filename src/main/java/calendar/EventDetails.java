@@ -11,6 +11,12 @@ public class EventDetails {
     private LocalDate eventDate;
 
     //TODO implement checklists stuff
+    public EventDetails(String eventName, LocalTime startTime, LocalTime endTime, LocalDate eventDate){
+        this.eventName = eventName;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.eventDate = eventDate;
+    }
 
     public String getEventName() {
         return eventName;

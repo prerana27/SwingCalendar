@@ -1,14 +1,16 @@
 package calendar;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static javax.swing.BoxLayout.Y_AXIS;
@@ -31,10 +33,12 @@ public class CalendarMainWindow extends JFrame {
     private boolean dayViewSelected;
     private DayViewComponent dayViewComponent;
     private JScrollPane dayViewScrollPane;
+    public static Map<String, java.util.List<EventDetails>> eventsMap;
 
     public boolean isDayViewSelected() {
         return dayViewSelected;
     }
+
     public void setDayViewSelected(boolean dayViewSelected) {
         this.dayViewSelected = dayViewSelected;
     }
@@ -45,7 +49,6 @@ public class CalendarMainWindow extends JFrame {
         dayViewSelected = true;
 
         //setting up date utilities
-        date = LocalDate.now();
         dayFormat = DateTimeFormatter.ofPattern("EEEE");
         monthYearFormat = DateTimeFormatter.ofPattern("MMMM yyyy");
         dateMonthFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
@@ -53,7 +56,9 @@ public class CalendarMainWindow extends JFrame {
         statusLabel.setMinimumSize(new Dimension(APP_WIDTH, 20));
         statusLabel.setVerticalTextPosition(SwingConstants.TOP);
 
-        dayViewComponent = new DayViewComponent(date);
+        eventsMap = new HashMap<>();
+        dayViewComponent = new DayViewComponent(date, eventsMap);
+        this.date = dayViewComponent.getCurrentDate();
 
         smallButton = new Dimension(100, 50);
         mediumButton = new Dimension(200, 50);
@@ -82,8 +87,8 @@ public class CalendarMainWindow extends JFrame {
         this.setMinimumSize(new Dimension(APP_WIDTH, APP_HEIGHT));
     }
 
-    private void setCurrentTime(){
-        Timer timer = new Timer(1000*60, e -> repaint());
+    private void setCurrentTime() {
+        Timer timer = new Timer(1000 * 60, e -> repaint());
         timer.start();
     }
 
@@ -253,7 +258,7 @@ public class CalendarMainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statusLabel.setText(String.format(status, today.getText()));
-                date = LocalDate.now();
+                date = dayViewComponent.setCurrentDate(LocalDate.now());
                 updateDateDisplay();
             }
         });
@@ -263,7 +268,7 @@ public class CalendarMainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statusLabel.setText(String.format(status, "Left"));
-                date = (isDayViewSelected() ? date.minusDays(1) : date.minusMonths(1));
+                date = dayViewComponent.updateDate(isDayViewSelected(), false);
                 updateDateDisplay();
             }
         });
@@ -273,7 +278,7 @@ public class CalendarMainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statusLabel.setText(String.format(status, "Right"));
-                date = (isDayViewSelected() ? date.plusDays(1) : date.plusMonths(1));
+                date = dayViewComponent.updateDate(isDayViewSelected(), true);
                 updateDateDisplay();
             }
         });
@@ -283,7 +288,7 @@ public class CalendarMainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statusLabel.setText(String.format(status, newEvent.getText()));
-                new NewEventDialogue(date, statusLabel);
+                new NewEventDialogue(dayViewComponent);
             }
         });
 

@@ -1,16 +1,10 @@
 package calendar;
 
-import utilities.TimeSpinner;
-
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import java.awt.*;
 import java.awt.event.*;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalTime;
 import java.util.logging.Logger;
 
 import static javax.swing.BoxLayout.Y_AXIS;
@@ -20,24 +14,25 @@ public class NewEventDialogue extends JDialog {
     private static final int TEXT_LEN = 15;
     private static final String DEFAULT_NAME = "New Event";
     private JPanel basePanel, eventDetails, eventType, buttonsPanel;
-    private JLabel statusLabel, nameLabel, dateLable, startLabel, endLabel;
+    private JLabel nameLabel, dateLable, startLabel, endLabel;
     private JTextField nameText, dateText;
-    private JSpinner startTime, endTime;
+    private JSpinner startHour, endHour, startMin, endMin;
     private LocalDate date;
     private JButton save, cancel;
     private Dimension labelSize;
     private JCheckBox work, family, vacation, health;
+    private DayViewComponent dayViewComponent;
+    private int default_h0 = 9, default_h1 = 9, default_m0 = 0, default_m1 = 30;
 
-
-    NewEventDialogue(LocalDate date, JLabel statusLabel) {
+    public void init() {
         //setting up basic stuff for the dialogue box
         logger.info("Creating a new Dialogue box to add new event to the Calendar");
-        this.date = date;
-        this.statusLabel = statusLabel;
+        this.date = dayViewComponent.getCurrentDate();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         labelSize = new Dimension(80, 40);
+    }
 
-
+    public void addPanel() {
         //panel that contains all other containers
         basePanel = new JPanel();
         basePanel.setLayout(new BoxLayout(basePanel, Y_AXIS));
@@ -52,6 +47,33 @@ public class NewEventDialogue extends JDialog {
         this.pack();
         this.setMinimumSize(new Dimension(400, 300));
         this.setVisible(true);
+    }
+
+    NewEventDialogue(DayViewComponent dayViewComponent) {
+        this.dayViewComponent = dayViewComponent;
+        init();
+        addPanel();
+    }
+
+    NewEventDialogue(DayViewComponent dayViewComponent, LocalTime start, LocalTime end) {
+        this.dayViewComponent = dayViewComponent;
+        this.default_h0 = start.getHour();
+        this.default_m0 = start.getMinute();
+        this.default_h1 = end.getHour();
+        this.default_m1 = end.getMinute();
+        init();
+        addPanel();
+    }
+
+    NewEventDialogue(DayViewComponent dayViewComponent, LocalTime start) {
+        this.dayViewComponent = dayViewComponent;
+        this.default_h0 = start.getHour();
+        this.default_m0 = start.getMinute();
+        LocalTime end = start.plusMinutes((long)DayViewComponent.MINUTE_GRANULARITY);
+        this.default_h1 = end.getHour();
+        this.default_m1 = end.getMinute();
+        init();
+        addPanel();
     }
 
     //this adds the first part with the text fields and spinners for time selection
@@ -82,24 +104,28 @@ public class NewEventDialogue extends JDialog {
         startLabel = new JLabel("Start Time :");
         startLabel.setMaximumSize(labelSize);
         startPanel.add(startLabel);
+
         //spinners to select start hour and minute
-        //TODO: change minute increment to 15min intervals
-        startTime = new JSpinner(new TimeSpinner("09:00"));
-        startTime.setEditor(new JSpinner.DateEditor(startTime, "HH:mm"));
-        startPanel.add(startTime);
+        startHour = new JSpinner(new SpinnerNumberModel(default_h0, 0, 23, 1));
+        startPanel.add(startHour);
+        startMin = new JSpinner(new SpinnerNumberModel(default_m0, 0, 59, 15));
+        startMin.setEditor(new JSpinner.NumberEditor(startMin, "00"));
+        startPanel.add(startMin);
 
         //this adds a label and a JSpinner to a new panel to ensure Flow Layout
         JPanel endPanel = new JPanel();
         endLabel = new JLabel("End Time :");
         endLabel.setMaximumSize(labelSize);
         endPanel.add(endLabel);
+
         //spinners to select start hour and minute
-        endTime = new JSpinner(new TimeSpinner("09:30"));
-        endTime.setEditor(new JSpinner.DateEditor(endTime, "HH:mm"));
-        endPanel.add(endTime);
+        endHour = new JSpinner(new SpinnerNumberModel(default_h1, 0, 23, 1));
+        endPanel.add(endHour);
+        endMin = new JSpinner(new SpinnerNumberModel(default_m1, 0, 59, 15));
+        endMin.setEditor(new JSpinner.NumberEditor(endMin, "00"));
+        endPanel.add(endMin);
 
         addFocusListeners();
-        addSpinnerListener();
         eventDetails.add(namePanel);
         eventDetails.add(datePanel);
         eventDetails.add(startPanel);
@@ -126,40 +152,21 @@ public class NewEventDialogue extends JDialog {
                 Object src = e.getSource();
                 if (src.equals(nameText) && DEFAULT_NAME.equals(nameText.getText())) {
                     nameText.setForeground(setColorTo);
-                    statusLabel.setText("Editing new event name");
+                    logger.info("Editing new event name");
                 } else if (src.equals(dateText) && date.toString().equals(dateText.getText())) {
                     dateText.setForeground(setColorTo);
-                    statusLabel.setText("Editing new event date");
-                } else if (src.equals(startTime)) {
-                    statusLabel.setText("Editing new event's start time");
-                } else if (src.equals(endTime)) {
-                    statusLabel.setText("Editing new event's end time");
+                    logger.info("Editing new event date");
+                } else if (src.equals(startHour)) {
+                    logger.info("Editing new event's start time");
+                } else if (src.equals(endHour)) {
+                    logger.info("Editing new event's end time");
                 }
-                logger.info(statusLabel.getText());
             }
         };
 
         //adding listeners for text fields
         nameText.addFocusListener(focusListener);
         dateText.addFocusListener(focusListener);
-    }
-
-    private void addSpinnerListener() {
-        //change listener for the JSpinners - basically to update the status label for now
-        ChangeListener changeListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if (e.getSource().equals(startTime)) {
-                    statusLabel.setText("Editing new event's start time to" + getTime(startTime));
-                } else if (e.getSource().equals(endTime)) {
-                    statusLabel.setText("Editing new event's end time to" + getTime(endTime));
-                }
-            }
-        };
-
-        //adding listener for the Spinners
-        startTime.addChangeListener(changeListener);
-        endTime.addChangeListener(changeListener);
     }
 
     private void addCheckboxListener() {
@@ -174,18 +181,14 @@ public class NewEventDialogue extends JDialog {
                 String display;
                 if (source.equals(work)) {
                     display = String.format(s, work.getText(), isSelected);
-                    statusLabel.setText(display);
                 } else if (source.equals(family)) {
                     display = String.format(s, family.getText(), isSelected);
-                    statusLabel.setText(display);
                 } else if (source.equals(vacation)) {
                     display = String.format(s, vacation.getText(), isSelected);
-                    statusLabel.setText(display);
-                } else if (source.equals(health)) {
+                } else {
                     display = String.format(s, health.getText(), isSelected);
-                    statusLabel.setText(display);
                 }
-                logger.info(statusLabel.getText());
+                logger.info(display);
             }
         };
 
@@ -224,8 +227,7 @@ public class NewEventDialogue extends JDialog {
         cancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                statusLabel.setText("Create new event dialog box cancelled.");
-                logger.info(statusLabel.getText());
+                logger.info("Create new event dialog box cancelled.");
                 NewEventDialogue.super.dispose();
             }
         });
@@ -234,8 +236,8 @@ public class NewEventDialogue extends JDialog {
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                statusLabel.setText(String.format("New Event created with title \"%s\" on %s during %s - %s", nameText.getText(), dateText.getText(), getTime(startTime), getTime(endTime)));
-                logger.info(statusLabel.getText());
+                logger.info(String.format("New Event created with title \"%s\" on %s during %s - %s", nameText.getText(), dateText.getText(), getTime(true), getTime(false)));
+                dayViewComponent.addEvent(new EventDetails(nameText.getText(), getTime(true), getTime(false), LocalDate.parse(dateText.getText())));
                 NewEventDialogue.super.dispose();
             }
         });
@@ -246,9 +248,9 @@ public class NewEventDialogue extends JDialog {
     }
 
     //utility to extract only Time from the value returned by JSpinner
-    private String getTime(JSpinner spinner) {
-        Date inputDate = (Date) spinner.getValue();
-        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
-        return formatter.format(inputDate);
+    private LocalTime getTime(boolean start) {
+        if (start)
+            return LocalTime.of((Integer) startHour.getValue(), (Integer) startMin.getValue());
+        return LocalTime.of((Integer) endHour.getValue(), (Integer) endMin.getValue());
     }
 }
