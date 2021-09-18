@@ -1,5 +1,7 @@
 package calendar;
 
+import utilities.TimeSpinner;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -16,7 +18,7 @@ import static javax.swing.BoxLayout.Y_AXIS;
 public class NewEventDialogue extends JDialog {
     private static Logger logger = Logger.getLogger("calendar.NewEventDialogue");
     private static final int TEXT_LEN = 15;
-    private static final String DEFAULT_NAME = "New Event", DEFAULT_START = "18:00", DEFAULT_END = "18:30";
+    private static final String DEFAULT_NAME = "New Event";
     private JPanel basePanel, eventDetails, eventType, buttonsPanel;
     private JLabel statusLabel, nameLabel, dateLable, startLabel, endLabel;
     private JTextField nameText, dateText;
@@ -24,6 +26,8 @@ public class NewEventDialogue extends JDialog {
     private LocalDate date;
     private JButton save, cancel;
     private Dimension labelSize;
+    private JCheckBox work, family, vacation, health;
+
 
     NewEventDialogue(LocalDate date, JLabel statusLabel) {
         //setting up basic stuff for the dialogue box
@@ -32,6 +36,7 @@ public class NewEventDialogue extends JDialog {
         this.statusLabel = statusLabel;
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         labelSize = new Dimension(80, 40);
+
 
         //panel that contains all other containers
         basePanel = new JPanel();
@@ -78,7 +83,8 @@ public class NewEventDialogue extends JDialog {
         startLabel.setMaximumSize(labelSize);
         startPanel.add(startLabel);
         //spinners to select start hour and minute
-        startTime = new JSpinner(new SpinnerDateModel());
+        //TODO: change minute increment to 15min intervals
+        startTime = new JSpinner(new TimeSpinner("09:00"));
         startTime.setEditor(new JSpinner.DateEditor(startTime, "HH:mm"));
         startPanel.add(startTime);
 
@@ -88,10 +94,20 @@ public class NewEventDialogue extends JDialog {
         endLabel.setMaximumSize(labelSize);
         endPanel.add(endLabel);
         //spinners to select start hour and minute
-        endTime = new JSpinner(new SpinnerDateModel());
+        endTime = new JSpinner(new TimeSpinner("09:30"));
         endTime.setEditor(new JSpinner.DateEditor(endTime, "HH:mm"));
         endPanel.add(endTime);
 
+        addFocusListeners();
+        addSpinnerListener();
+        eventDetails.add(namePanel);
+        eventDetails.add(datePanel);
+        eventDetails.add(startPanel);
+        eventDetails.add(endPanel);
+        return eventDetails;
+    }
+
+    private void addFocusListeners() {
         //focus listener to have some responsive behavior with the text fields
         FocusListener focusListener = new FocusListener() {
             @Override
@@ -126,7 +142,9 @@ public class NewEventDialogue extends JDialog {
         //adding listeners for text fields
         nameText.addFocusListener(focusListener);
         dateText.addFocusListener(focusListener);
+    }
 
+    private void addSpinnerListener() {
         //change listener for the JSpinners - basically to update the status label for now
         ChangeListener changeListener = new ChangeListener() {
             @Override
@@ -142,23 +160,9 @@ public class NewEventDialogue extends JDialog {
         //adding listener for the Spinners
         startTime.addChangeListener(changeListener);
         endTime.addChangeListener(changeListener);
-
-        eventDetails.add(namePanel);
-        eventDetails.add(datePanel);
-        eventDetails.add(startPanel);
-        eventDetails.add(endPanel);
-        return eventDetails;
     }
 
-    //this adds the panel with the event type checkboxes
-    private JPanel addEventTypes() {
-        eventType = new JPanel();
-
-        JCheckBox work = new JCheckBox("Work");
-        JCheckBox family = new JCheckBox("Family");
-        JCheckBox vacation = new JCheckBox("Vacation");
-        JCheckBox health = new JCheckBox("Health");
-
+    private void addCheckboxListener() {
         //For now this listener is only used to update the status label
         ItemListener itemListener = new ItemListener() {
             @Override
@@ -189,6 +193,18 @@ public class NewEventDialogue extends JDialog {
         family.addItemListener(itemListener);
         vacation.addItemListener(itemListener);
         health.addItemListener(itemListener);
+    }
+
+    //this adds the panel with the event type checkboxes
+    private JPanel addEventTypes() {
+        eventType = new JPanel();
+
+        work = new JCheckBox("Work");
+        family = new JCheckBox("Family");
+        vacation = new JCheckBox("Vacation");
+        health = new JCheckBox("Health");
+
+        addCheckboxListener();
 
         eventType.add(work);
         eventType.add(vacation);
