@@ -75,9 +75,16 @@ public class CalendarMainWindow extends JFrame {
         //Set up the content pane for the JFrame
         setMainContent();
 
+        setCurrentTime();
+
         //pack and make the frame ready!
         this.pack();
         this.setMinimumSize(new Dimension(APP_WIDTH, APP_HEIGHT));
+    }
+
+    private void setCurrentTime(){
+        Timer timer = new Timer(1000*60, e -> repaint());
+        timer.start();
     }
 
     private void setMenuBar() {
