@@ -12,7 +12,7 @@ import static javax.swing.BoxLayout.Y_AXIS;
 public class NewEventDialogue extends JDialog {
     private static Logger logger = Logger.getLogger("calendar.NewEventDialogue");
     private static final int TEXT_LEN = 15;
-    private static final String DEFAULT_NAME = "New Event";
+    private String DEFAULT_NAME = "New Event";
     private JPanel basePanel, eventDetails, eventType, buttonsPanel;
     private JLabel nameLabel, dateLable, startLabel, endLabel;
     private JTextField nameText, dateText;
@@ -23,6 +23,7 @@ public class NewEventDialogue extends JDialog {
     private JCheckBox work, family, vacation, health;
     private DayViewComponent dayViewComponent;
     private int default_h0 = 9, default_h1 = 9, default_m0 = 0, default_m1 = 30;
+    private EventDetails currEvent;
 
     public void init() {
         //setting up basic stuff for the dialogue box
@@ -65,16 +66,30 @@ public class NewEventDialogue extends JDialog {
         addPanel();
     }
 
+    NewEventDialogue(DayViewComponent dayViewComponent, EventDetails eventDetails) {
+        this.dayViewComponent = dayViewComponent;
+        this.currEvent = eventDetails;
+        this.DEFAULT_NAME = eventDetails.getEventName();
+        this.default_h1 = eventDetails.getEndTime().getHour();
+        this.default_m1 = eventDetails.getEndTime().getMinute();
+        this.default_h0 = eventDetails.getStartTime().getHour();
+        this.default_m0 = eventDetails.getStartTime().getMinute();
+        this.date = eventDetails.getEventDate();
+        init();
+        addPanel();
+    }
+
     NewEventDialogue(DayViewComponent dayViewComponent, LocalTime start) {
         this.dayViewComponent = dayViewComponent;
         this.default_h0 = start.getHour();
         this.default_m0 = start.getMinute();
-        LocalTime end = start.plusMinutes((long)DayViewComponent.MINUTE_GRANULARITY);
+        LocalTime end = start.plusMinutes((long) DayViewComponent.MINUTE_GRANULARITY);
         this.default_h1 = end.getHour();
         this.default_m1 = end.getMinute();
         init();
         addPanel();
     }
+
 
     //this adds the first part with the text fields and spinners for time selection
     private JPanel addEventDetails() {
@@ -94,7 +109,7 @@ public class NewEventDialogue extends JDialog {
         JPanel datePanel = new JPanel();
         dateLable = new JLabel("Date:");
         dateLable.setMaximumSize(labelSize);
-        dateText = new JTextField(date.toString(), TEXT_LEN);
+        dateText = new JTextField(this.date.toString(), TEXT_LEN);
         dateText.setForeground(Color.GRAY);
         datePanel.add(dateLable);
         datePanel.add(dateText);
@@ -237,7 +252,14 @@ public class NewEventDialogue extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 logger.info(String.format("New Event created with title \"%s\" on %s during %s - %s", nameText.getText(), dateText.getText(), getTime(true), getTime(false)));
-                dayViewComponent.addEvent(new EventDetails(nameText.getText(), getTime(true), getTime(false), LocalDate.parse(dateText.getText())));
+                if (currEvent != null) {
+                    currEvent.setStartTime(getTime(true));
+                    currEvent.setEndTime(getTime(false));
+                    currEvent.setEventName(nameText.getText());
+                    dayViewComponent.repaintOnUpdate();
+                } else {
+                    dayViewComponent.addEvent(new EventDetails(nameText.getText(), getTime(true), getTime(false), LocalDate.parse(dateText.getText())));
+                }
                 NewEventDialogue.super.dispose();
             }
         });

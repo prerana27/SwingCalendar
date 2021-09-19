@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.*;
 import java.util.logging.Logger;
@@ -62,7 +63,7 @@ public class DayViewComponent extends JComponent {
     DayViewComponent(LocalDate localDate, Map<String, List<EventDetails>> eventsMap) {
         this.currentDate = LocalDate.now();
         this.eventsMap = eventsMap;
-        timeFont = new Font("SansSerif", Font.PLAIN, 14);
+        timeFont = new Font("SansSerif", Font.PLAIN, 13);
         fontMetrics = getFontMetrics(timeFont);
         maxWidthTime = fontMetrics.stringWidth("08:00") + 20;
         TIME_LINE_X0 = TIME_X0 + maxWidthTime;
@@ -91,13 +92,15 @@ public class DayViewComponent extends JComponent {
 
     private void drawDayDivision(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        g2.setColor(Color.LIGHT_GRAY);
+        g2.setColor(new Color(212,212,212,150));
         g2.setFont(timeFont);
 
         for (int i = 0; i <= 24; i++) {
             int y = HEADER_Y1 + i * TIME_BOX_HEIGHT;
-            g2.drawString(START_TIME.plusHours(i).toString(), TIME_X0, y + TIME_LINE_PADDING);
+            g2.setColor(new Color(212,212,212,150));
             g2.drawLine(TIME_X0 + maxWidthTime, y, TIME_LINE_X1, y);
+            g2.setColor(Color.GRAY);
+            g2.drawString(START_TIME.plusHours(i).toString(), TIME_X0, y + TIME_LINE_PADDING);
         }
 
     }
@@ -119,8 +122,13 @@ public class DayViewComponent extends JComponent {
             int numberEvents = events.size();
 
             for (int i = 0; i < numberEvents; i++) {
+                EventDetails curr = events.get(i);
+                int boxHeight = (int) curr.getStartTime().until(curr.getEndTime(), ChronoUnit.MINUTES) * TIME_BOX_HEIGHT / 60;
                 g2.setColor(new Color(255, 203, 199, 150));
-                g2.fillRect(TIME_LINE_X0, getTimeToPosn(events.get(i).getStartTime()), TIME_BOX_WIDTH, TIME_BOX_HEIGHT);
+                g2.fillRect(TIME_LINE_X0, getTimeToPosn(curr.getStartTime()), TIME_BOX_WIDTH, boxHeight);
+                g2.setColor(Color.GRAY);
+                g2.setFont(timeFont);
+                g2.drawString(curr.getEventName(), TIME_LINE_X0 + 5, getTimeToPosn(curr.getStartTime()) + 13);
             }
         }
     }
@@ -143,8 +151,10 @@ public class DayViewComponent extends JComponent {
         public void mousePressed(MouseEvent e) {
             logger.info(String.format("mousePressed at %s which is %s", e.getY(), getPosnToTime(e.getY())));
             if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
-                checkForEvent(e);
-                new NewEventDialogue(DayViewComponent.this, getPosnToTime(e.getY()));
+                if(checkForEvent(e) == null)
+                    new NewEventDialogue(DayViewComponent.this, getPosnToTime(e.getY()));
+                else
+                    new NewEventDialogue(DayViewComponent.this, checkForEvent(e));
                 logger.info(String.format("Double Clicked at %s which is %s", e.getY(), getPosnToTime(e.getY())));
             }
         }
@@ -161,8 +171,19 @@ public class DayViewComponent extends JComponent {
         return time.plusMinutes( mod < 8 ? -mod : (15-mod));
     }
 
-    public void checkForEvent(MouseEvent e){
+    public EventDetails checkForEvent(MouseEvent e){
+        if(!eventsMap.containsKey(this.currentDate.toString())) return null;
 
+        List<EventDetails> events = eventsMap.get(this.currentDate.toString());
+
+        for(EventDetails evt : events){
+            int y0 = getTimeToPosn(evt.getStartTime());
+            int y1 = getTimeToPosn(evt.getEndTime());
+
+            if(e.getY()>y0 && e.getY()<y1)
+                return evt;
+        }
+        return null;
     }
 
     public void addEvent(EventDetails eventDetails) {
@@ -171,6 +192,10 @@ public class DayViewComponent extends JComponent {
         } else {
             eventsMap.put(eventDetails.getEventDate().toString(), new ArrayList<>(Arrays.asList(eventDetails)));
         }
+        this.repaint();
+    }
+
+    public void repaintOnUpdate(){
         this.repaint();
     }
 }
