@@ -252,7 +252,6 @@ public class NewEventDialogue extends JDialog {
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                logger.info(String.format("New Event created with title \"%s\" on %s during %s - %s", nameText.getText(), dateText.getText(), getTime(true), getTime(false)));
                 if (currEvent != null) {
                     currEvent.setStartTime(getTime(true));
                     currEvent.setEndTime(getTime(false));

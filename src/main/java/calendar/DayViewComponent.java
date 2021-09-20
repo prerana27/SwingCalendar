@@ -19,7 +19,7 @@ public class DayViewComponent extends JComponent {
     private static final int HEADER_Y1 = HEADER_Y0 + HEADER_HEIGHT;
     private static final int COMPONENT_WIDTH = 800;
     private static final int COMPONENT_HEIGHT = 600;
-    private static final int COMPONENT_MAX_HEIGHT = 1550;
+    private static final int COMPONENT_MAX_HEIGHT = 1500;
     private static final int TIME_X0 = LEFT_PADDING_X0 + 10;
     private static final int TIME_LINE_X1 = COMPONENT_WIDTH - 2 * LEFT_PADDING_X0;
     private static final int TIME_BOX_HEIGHT = 60;
@@ -27,6 +27,7 @@ public class DayViewComponent extends JComponent {
     private static int TIME_LINE_X0;
     private static final int TIME_LINE_PADDING = 4;
     public static final double MINUTE_GRANULARITY = 15.0;
+    private static final int LAST_LINE_Y = HEADER_Y1 + 24 * TIME_BOX_HEIGHT;
     private boolean isDragging = false;
     private EventDetails evt = null;
     private int startY;
@@ -122,7 +123,6 @@ public class DayViewComponent extends JComponent {
             List<EventDetails> events = eventsMap.get(e);
             int numberEvents = events.size();
 
-            //TODO check drawing for events post 23:45
             for (int i = 0; i < numberEvents; i++) {
                 EventDetails curr = events.get(i);
                 int boxHeight = (int) curr.getStartTime().until(curr.getEndTime(), ChronoUnit.MINUTES) * TIME_BOX_HEIGHT / 60;
@@ -136,6 +136,8 @@ public class DayViewComponent extends JComponent {
     }
 
     public LocalTime getPosnToTime(int y) {
+        if (y > LAST_LINE_Y)
+            return LocalTime.of(23, 59);
         int hour = ((y - HEADER_Y1) / TIME_BOX_HEIGHT) % 24;
         int min = ((y - HEADER_Y1 - (hour * TIME_BOX_HEIGHT)) * 60 / TIME_BOX_HEIGHT) % 60;
         if (min < 0) min = 0;
@@ -145,8 +147,7 @@ public class DayViewComponent extends JComponent {
     }
 
     public int getTimeToPosn(LocalTime time) {
-        int y = HEADER_Y1 + time.getHour() * TIME_BOX_HEIGHT + (60 * time.getMinute() / TIME_BOX_HEIGHT);
-        return y;
+        return HEADER_Y1 + time.getHour() * TIME_BOX_HEIGHT + (60 * time.getMinute() / TIME_BOX_HEIGHT);
     }
 
     private class ClickListener implements MouseListener {
@@ -157,6 +158,8 @@ public class DayViewComponent extends JComponent {
 
         @Override
         public void mousePressed(MouseEvent e) {
+            if(e.getY() > LAST_LINE_Y)
+                return;
             logger.info(String.format("mousePressed at %s which is %s", e.getY(), getPosnToTime(e.getY())));
             if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
                 if (checkForEvent(e) == null)
@@ -170,8 +173,8 @@ public class DayViewComponent extends JComponent {
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            if (evt == null && isDragging) {
-                logger.info(String.format("Creting event for points %s %s", startY, e.getY()));
+            if (evt == null && isDragging && startY != e.getY()) {
+                logger.info(String.format("Creating event for points %s %s", startY, e.getY()));
                 addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate));
                 DayViewComponent.this.repaint();
             }
@@ -195,7 +198,7 @@ public class DayViewComponent extends JComponent {
         @Override
         public void mouseDragged(MouseEvent e) {
             logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
-            if (evt==null && checkForEvent(e) != null) {
+            if (evt == null && checkForEvent(e) != null) {
                 evt = checkForEvent(e);
                 isDragging = true;
                 updateEvent(e);

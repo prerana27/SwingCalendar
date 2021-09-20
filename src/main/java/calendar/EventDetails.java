@@ -16,9 +16,8 @@ public class EventDetails {
     public EventDetails(String eventName, LocalTime startTime, LocalTime endTime, LocalDate eventDate) {
         this.eventName = eventName;
         this.startTime = startTime;
-        this.endTime = endTime;
+        setEndTime(endTime);
         this.eventDate = eventDate;
-        this.timeDiff = startTime.until(endTime, ChronoUnit.MINUTES);
     }
 
     public long getTimeDiff() {
@@ -51,7 +50,10 @@ public class EventDetails {
 
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
-        this.timeDiff = startTime.until(endTime, ChronoUnit.MINUTES);
+        if (startTime.until(endTime, ChronoUnit.MINUTES) < 0) {
+            this.endTime = LocalTime.of(23, 59);
+        }
+        this.timeDiff = startTime.until(this.endTime, ChronoUnit.MINUTES);
     }
 
     public LocalDate getEventDate() {
@@ -62,7 +64,7 @@ public class EventDetails {
         this.eventDate = eventDate;
     }
 
-    public String toString(){
-        return String.format("%s created for %s between %s - %s", this.eventName, this.eventDate, this.startTime, this.endTime);
+    public String toString() {
+        return String.format("%s created for %s between %s - %s with time diff of %s", this.eventName, this.eventDate, this.startTime, this.endTime, this.timeDiff);
     }
 }
