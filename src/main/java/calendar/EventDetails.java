@@ -61,4 +61,8 @@ public class EventDetails {
     public void setEventDate(LocalDate eventDate) {
         this.eventDate = eventDate;
     }
+
+    public String toString(){
+        return String.format("%s created for %s between %s - %s", this.eventName, this.eventDate, this.startTime, this.endTime);
+    }
 }

@@ -27,6 +27,9 @@ public class DayViewComponent extends JComponent {
     private static int TIME_LINE_X0;
     private static final int TIME_LINE_PADDING = 4;
     public static final double MINUTE_GRANULARITY = 15.0;
+    private boolean isDragging = false;
+    private EventDetails evt = null;
+    private int startY;
 
     public LocalDate getCurrentDate() {
         return currentDate;
@@ -146,7 +149,13 @@ public class DayViewComponent extends JComponent {
         return y;
     }
 
-    private class ClickListener extends MouseAdapter {
+    private class ClickListener implements MouseListener {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
         public void mousePressed(MouseEvent e) {
             logger.info(String.format("mousePressed at %s which is %s", e.getY(), getPosnToTime(e.getY())));
             if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
@@ -157,58 +166,12 @@ public class DayViewComponent extends JComponent {
                 logger.info(String.format("Double Clicked at %s which is %s", e.getY(), getPosnToTime(e.getY())));
             }
         }
-    }
 
-    private class DragListener implements MouseMotionListener, MouseListener {
-        boolean isDragging = false;
-        EventDetails evt = null;
-        int startY;
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
-            if (checkForEvent(e) != null) {
-                evt = checkForEvent(e);
-                isDragging = true;
-                updateEvent(e);
-            }
-
-            if (evt != null && isDragging) {
-                updateEvent(e);
-            }
-
-            if (evt == null) {
-                startY = e.getY();
-                isDragging = true;
-            }
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-
-        }
-
-        public void updateEvent(MouseEvent e) {
-            evt.setStartTime(getPosnToTime(e.getY()));
-            evt.setEndTime(evt.getStartTime().plusMinutes(evt.getTimeDiff()));
-            logger.info(String.format("%s moved to %s - %s", evt.getEventName(), evt.getStartTime(), evt.getEndTime()));
-            DayViewComponent.this.repaint();
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-
-        }
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            logger.info("PRERANA ADD NEW EVENT" + evt);
-            if (evt == null) {
+            if (evt == null && isDragging) {
+                logger.info(String.format("Creting event for points %s %s", startY, e.getY()));
                 addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate));
                 DayViewComponent.this.repaint();
             }
@@ -224,6 +187,40 @@ public class DayViewComponent extends JComponent {
         @Override
         public void mouseExited(MouseEvent e) {
 
+        }
+    }
+
+    private class DragListener implements MouseMotionListener {
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
+            if (checkForEvent(e) != null) {
+                evt = checkForEvent(e);
+                isDragging = true;
+                updateEvent(e);
+            }
+
+            if (evt != null && isDragging) {
+                updateEvent(e);
+            }
+
+            if (evt == null && !isDragging) {
+                startY = e.getY();
+                isDragging = true;
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+
+        }
+
+        public void updateEvent(MouseEvent e) {
+            evt.setStartTime(getPosnToTime(e.getY()));
+            evt.setEndTime(evt.getStartTime().plusMinutes(evt.getTimeDiff()));
+            logger.info(String.format("%s moved to %s - %s", evt.getEventName(), evt.getStartTime(), evt.getEndTime()));
+            DayViewComponent.this.repaint();
         }
     }
 
@@ -253,6 +250,7 @@ public class DayViewComponent extends JComponent {
         } else {
             eventsMap.put(eventDetails.getEventDate().toString(), new ArrayList<>(Arrays.asList(eventDetails)));
         }
+        logger.info(eventDetails.toString());
         this.repaint();
     }
 

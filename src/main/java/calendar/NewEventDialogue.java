@@ -12,7 +12,8 @@ import static javax.swing.BoxLayout.Y_AXIS;
 public class NewEventDialogue extends JDialog {
     private static Logger logger = Logger.getLogger("calendar.NewEventDialogue");
     private static final int TEXT_LEN = 15;
-    public static String DEFAULT_NAME = "New Event";
+    public static final String DEFAULT_NAME = "New Event";
+    private String eventName;
     private JPanel basePanel, eventDetails, eventType, buttonsPanel;
     private JLabel nameLabel, dateLable, startLabel, endLabel;
     private JTextField nameText, dateText;
@@ -69,7 +70,7 @@ public class NewEventDialogue extends JDialog {
     NewEventDialogue(DayViewComponent dayViewComponent, EventDetails eventDetails) {
         this.dayViewComponent = dayViewComponent;
         this.currEvent = eventDetails;
-        this.DEFAULT_NAME = eventDetails.getEventName();
+        this.eventName = eventDetails.getEventName();
         this.default_h1 = eventDetails.getEndTime().getHour();
         this.default_m1 = eventDetails.getEndTime().getMinute();
         this.default_h0 = eventDetails.getStartTime().getHour();
@@ -100,7 +101,7 @@ public class NewEventDialogue extends JDialog {
         JPanel namePanel = new JPanel();
         nameLabel = new JLabel("Name:");
         nameLabel.setMaximumSize(labelSize);
-        nameText = new JTextField(DEFAULT_NAME, TEXT_LEN);
+        nameText = new JTextField(getNameToUse(), TEXT_LEN);
         nameText.setForeground(Color.GRAY);
         namePanel.add(nameLabel);
         namePanel.add(nameText);
@@ -274,5 +275,9 @@ public class NewEventDialogue extends JDialog {
         if (start)
             return LocalTime.of((Integer) startHour.getValue(), (Integer) startMin.getValue());
         return LocalTime.of((Integer) endHour.getValue(), (Integer) endMin.getValue());
+    }
+
+    private String getNameToUse() {
+        return (this.eventName == null || this.eventName.isEmpty() ? DEFAULT_NAME : this.eventName);
     }
 }
