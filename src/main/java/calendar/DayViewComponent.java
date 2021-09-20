@@ -195,7 +195,7 @@ public class DayViewComponent extends JComponent {
         @Override
         public void mouseDragged(MouseEvent e) {
             logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
-            if (checkForEvent(e) != null) {
+            if (evt==null && checkForEvent(e) != null) {
                 evt = checkForEvent(e);
                 isDragging = true;
                 updateEvent(e);
