@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.Logger;
 
 import static javax.swing.BoxLayout.Y_AXIS;
@@ -19,7 +20,7 @@ public class NewEventDialogue extends JDialog {
     private JTextField nameText, dateText;
     private JSpinner startHour, endHour, startMin, endMin;
     private LocalDate date;
-    private JButton save, cancel;
+    private JButton save, cancel, delete;
     private Dimension labelSize;
     private JCheckBox work, family, vacation, health;
     private DayViewComponent dayViewComponent;
@@ -43,6 +44,7 @@ public class NewEventDialogue extends JDialog {
         basePanel.add(addEventDetails());
         basePanel.add(addEventTypes());
         basePanel.add(addButtons());
+        basePanel.setBackground(Color.WHITE);
 
         this.add(basePanel);
 
@@ -85,6 +87,8 @@ public class NewEventDialogue extends JDialog {
         this.default_h0 = start.getHour();
         this.default_m0 = start.getMinute();
         LocalTime end = start.plusHours(1);
+        if (start.until(end, ChronoUnit.MINUTES) < 0)
+            end = LocalTime.of(23, 59);
         this.default_h1 = end.getHour();
         this.default_m1 = end.getMinute();
         init();
@@ -238,6 +242,7 @@ public class NewEventDialogue extends JDialog {
 
         save = new JButton("Save");
         cancel = new JButton("Cancel");
+        delete = new JButton("Delete Event");
 
         //action listener for the cancel button
         cancel.addActionListener(new ActionListener() {
@@ -264,8 +269,20 @@ public class NewEventDialogue extends JDialog {
             }
         });
 
+        delete.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (currEvent != null) {
+                    dayViewComponent.removeEvent(currEvent);
+                }
+                NewEventDialogue.super.dispose();
+            }
+        });
+
         buttonsPanel.add(cancel);
         buttonsPanel.add(save);
+        if (currEvent != null)
+            buttonsPanel.add(delete);
         return buttonsPanel;
     }
 
