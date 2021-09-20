@@ -2,9 +2,7 @@ package calendar;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -92,12 +90,12 @@ public class DayViewComponent extends JComponent {
 
     private void drawDayDivision(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        g2.setColor(new Color(212,212,212,150));
+        g2.setColor(new Color(212, 212, 212, 150));
         g2.setFont(timeFont);
 
         for (int i = 0; i <= 24; i++) {
             int y = HEADER_Y1 + i * TIME_BOX_HEIGHT;
-            g2.setColor(new Color(212,212,212,150));
+            g2.setColor(new Color(212, 212, 212, 150));
             g2.drawLine(TIME_X0 + maxWidthTime, y, TIME_LINE_X1, y);
             g2.setColor(Color.GRAY);
             g2.drawString(START_TIME.plusHours(i).toString(), TIME_X0, y + TIME_LINE_PADDING);
@@ -121,6 +119,7 @@ public class DayViewComponent extends JComponent {
             List<EventDetails> events = eventsMap.get(e);
             int numberEvents = events.size();
 
+            //TODO check drawing for events post 23:45
             for (int i = 0; i < numberEvents; i++) {
                 EventDetails curr = events.get(i);
                 int boxHeight = (int) curr.getStartTime().until(curr.getEndTime(), ChronoUnit.MINUTES) * TIME_BOX_HEIGHT / 60;
@@ -151,7 +150,7 @@ public class DayViewComponent extends JComponent {
         public void mousePressed(MouseEvent e) {
             logger.info(String.format("mousePressed at %s which is %s", e.getY(), getPosnToTime(e.getY())));
             if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
-                if(checkForEvent(e) == null)
+                if (checkForEvent(e) == null)
                     new NewEventDialogue(DayViewComponent.this, getPosnToTime(e.getY()));
                 else
                     new NewEventDialogue(DayViewComponent.this, checkForEvent(e));
@@ -160,27 +159,89 @@ public class DayViewComponent extends JComponent {
         }
     }
 
-    private class DragListener extends MouseMotionAdapter {
+    private class DragListener implements MouseMotionListener, MouseListener {
+        boolean isDragging = false;
+        EventDetails evt = null;
+        int startY;
+
+        @Override
         public void mouseDragged(MouseEvent e) {
             logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
+            if (checkForEvent(e) != null) {
+                evt = checkForEvent(e);
+                isDragging = true;
+                updateEvent(e);
+            }
+
+            if (evt != null && isDragging) {
+                updateEvent(e);
+            }
+
+            if (evt == null) {
+                startY = e.getY();
+                isDragging = true;
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+
+        }
+
+        public void updateEvent(MouseEvent e) {
+            evt.setStartTime(getPosnToTime(e.getY()));
+            evt.setEndTime(evt.getStartTime().plusMinutes(evt.getTimeDiff()));
+            logger.info(String.format("%s moved to %s - %s", evt.getEventName(), evt.getStartTime(), evt.getEndTime()));
+            DayViewComponent.this.repaint();
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            logger.info("PRERANA ADD NEW EVENT" + evt);
+            if (evt == null) {
+                addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate));
+                DayViewComponent.this.repaint();
+            }
+            isDragging = false;
+            evt = null;
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
         }
     }
 
     public LocalTime roundMinutes(LocalTime time) {
-        int mod = (int)(time.getMinute() % MINUTE_GRANULARITY);
-        return time.plusMinutes( mod < 8 ? -mod : (15-mod));
+        int mod = (int) (time.getMinute() % MINUTE_GRANULARITY);
+        return time.plusMinutes(mod < 8 ? -mod : (15 - mod));
     }
 
-    public EventDetails checkForEvent(MouseEvent e){
-        if(!eventsMap.containsKey(this.currentDate.toString())) return null;
+    public EventDetails checkForEvent(MouseEvent e) {
+        if (!eventsMap.containsKey(this.currentDate.toString())) return null;
 
         List<EventDetails> events = eventsMap.get(this.currentDate.toString());
 
-        for(EventDetails evt : events){
+        for (EventDetails evt : events) {
             int y0 = getTimeToPosn(evt.getStartTime());
             int y1 = getTimeToPosn(evt.getEndTime());
 
-            if(e.getY()>y0 && e.getY()<y1)
+            if (e.getY() > y0 && e.getY() < y1)
                 return evt;
         }
         return null;
@@ -195,7 +256,7 @@ public class DayViewComponent extends JComponent {
         this.repaint();
     }
 
-    public void repaintOnUpdate(){
+    public void repaintOnUpdate() {
         this.repaint();
     }
 }

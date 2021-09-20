@@ -12,7 +12,7 @@ import static javax.swing.BoxLayout.Y_AXIS;
 public class NewEventDialogue extends JDialog {
     private static Logger logger = Logger.getLogger("calendar.NewEventDialogue");
     private static final int TEXT_LEN = 15;
-    private String DEFAULT_NAME = "New Event";
+    public static String DEFAULT_NAME = "New Event";
     private JPanel basePanel, eventDetails, eventType, buttonsPanel;
     private JLabel nameLabel, dateLable, startLabel, endLabel;
     private JTextField nameText, dateText;
@@ -83,7 +83,7 @@ public class NewEventDialogue extends JDialog {
         this.dayViewComponent = dayViewComponent;
         this.default_h0 = start.getHour();
         this.default_m0 = start.getMinute();
-        LocalTime end = start.plusMinutes((long) DayViewComponent.MINUTE_GRANULARITY);
+        LocalTime end = start.plusHours(1);
         this.default_h1 = end.getHour();
         this.default_m1 = end.getMinute();
         init();
