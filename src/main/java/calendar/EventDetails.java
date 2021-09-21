@@ -3,6 +3,7 @@ package calendar;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 
 public class EventDetails {
@@ -24,12 +25,12 @@ public class EventDetails {
     private Map<String, Boolean> types;
 
     //TODO implement checklists stuff
-    public EventDetails(String eventName, LocalTime startTime, LocalTime endTime, LocalDate eventDate, Map<String, Boolean> types) {
+    public EventDetails(String eventName, LocalTime startTime, LocalTime endTime, LocalDate eventDate) {
         this.eventName = eventName;
         this.startTime = startTime;
         setEndTime(endTime);
         this.eventDate = eventDate;
-        this.types = types;
+        initMap();
     }
 
     public long getTimeDiff() {
@@ -89,5 +90,14 @@ public class EventDetails {
                 stringBuilder.append(key).append(" ");
         }
         return stringBuilder.toString();
+    }
+
+    private void initMap() {
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("Work", false);
+        map.put("Family", false);
+        map.put("Vacation", false);
+        map.put("Health", false);
+        this.types = map;
     }
 }

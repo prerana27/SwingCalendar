@@ -194,7 +194,7 @@ public class DayViewComponent extends JComponent {
         public void mouseReleased(MouseEvent e) {
             if (evt == null && isDragging && startY != e.getY()) {
                 logger.info(String.format("Creating event for points %s %s", startY, e.getY()));
-                addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate, new HashMap<>()));
+                addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate));
                 DayViewComponent.this.repaint();
             }
             isDragging = false;

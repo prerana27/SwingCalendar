@@ -6,7 +6,6 @@ import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -28,7 +27,7 @@ public class NewEventDialogue extends JDialog {
     private DayViewComponent dayViewComponent;
     private int default_h0 = 9, default_h1 = 9, default_m0 = 0, default_m1 = 30;
     private EventDetails currEvent;
-    public static final Color WORK = new Color(209, 209, 255,255);
+    public static final Color WORK = new Color(209, 209, 255, 255);
     public static final Color FAMILY = new Color(207, 227, 198, 255);
     public static final Color HEALTH = new Color(255, 219, 219, 255);
     public static final Color VACATION = new Color(255, 234, 135, 255);
@@ -86,6 +85,7 @@ public class NewEventDialogue extends JDialog {
         this.date = eventDetails.getEventDate();
         init();
         addPanel();
+        updateTypesMap(eventDetails.getTypes());
     }
 
     NewEventDialogue(DayViewComponent dayViewComponent, LocalTime start) {
@@ -221,7 +221,7 @@ public class NewEventDialogue extends JDialog {
                 }
                 logger.info(display);
 
-                if(currEvent!=null)
+                if (currEvent != null)
                     updateTypesMap(currEvent.getTypes());
             }
         };
@@ -238,15 +238,19 @@ public class NewEventDialogue extends JDialog {
         eventType.setBackground(Color.WHITE);
 
         work = new JCheckBox("Work");
-        work.setOpaque(true); work.setBackground(WORK);
+        work.setOpaque(true);
+        work.setBackground(WORK);
         family = new JCheckBox("Family");
-        family.setOpaque(true); family.setBackground(FAMILY);
+        family.setOpaque(true);
+        family.setBackground(FAMILY);
         vacation = new JCheckBox("Vacation");
-        vacation.setOpaque(true); vacation.setBackground(VACATION);
+        vacation.setOpaque(true);
+        vacation.setBackground(VACATION);
         health = new JCheckBox("Health");
-        health.setOpaque(true); health.setBackground(HEALTH);
+        health.setOpaque(true);
+        health.setBackground(HEALTH);
 
-        if(this.currEvent!=null){
+        if (this.currEvent != null) {
             work.setSelected(currEvent.getTypes().get(work.getText()));
             family.setSelected(currEvent.getTypes().get(family.getText()));
             vacation.setSelected(currEvent.getTypes().get(vacation.getText()));
@@ -284,16 +288,16 @@ public class NewEventDialogue extends JDialog {
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Map<String, Boolean> map = new HashMap<>();
-                updateTypesMap(map);
-
                 if (currEvent != null) {
                     currEvent.setStartTime(getTime(true));
                     currEvent.setEndTime(getTime(false));
                     currEvent.setEventName(nameText.getText());
+                    updateTypesMap(currEvent.getTypes());
                     dayViewComponent.repaintOnUpdate();
                 } else {
-                    dayViewComponent.addEvent(new EventDetails(nameText.getText(), getTime(true), getTime(false), LocalDate.parse(dateText.getText()), map));
+                    EventDetails tmp = new EventDetails(nameText.getText(), getTime(true), getTime(false), LocalDate.parse(dateText.getText()));
+                    dayViewComponent.addEvent(tmp);
+                    updateTypesMap(tmp.getTypes());
                 }
                 NewEventDialogue.super.dispose();
             }
@@ -327,7 +331,7 @@ public class NewEventDialogue extends JDialog {
         return (this.eventName == null || this.eventName.isEmpty() ? DEFAULT_NAME : this.eventName);
     }
 
-    private void updateTypesMap(Map<String, Boolean> map){
+    private void updateTypesMap(Map<String, Boolean> map) {
         map.put(work.getText(), work.isSelected());
         map.put(family.getText(), family.isSelected());
         map.put(vacation.getText(), vacation.isSelected());

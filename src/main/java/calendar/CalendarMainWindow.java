@@ -303,7 +303,7 @@ public class CalendarMainWindow extends JFrame {
     private JPanel addEventTypeMap() {
         JPanel mapping = new JPanel();
         mapping.setBackground(Color.WHITE);
-        mapping.setMaximumSize(new Dimension(200,600));
+        mapping.setMaximumSize(new Dimension(200, 600));
 
         mapping.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
