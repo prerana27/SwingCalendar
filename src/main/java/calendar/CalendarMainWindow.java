@@ -29,7 +29,7 @@ public class CalendarMainWindow extends JFrame {
     private JLabel selectedView, displayDay, displayDate;
     private LocalDate date;
     private DateTimeFormatter dateMonthFormat, dayFormat, monthYearFormat;
-    private Dimension smallButton, mediumButton;
+    private Dimension smallButton, mediumButton, mappingSize;
     private boolean dayViewSelected;
     private DayViewComponent dayViewComponent;
     private JScrollPane dayViewScrollPane;
@@ -62,6 +62,7 @@ public class CalendarMainWindow extends JFrame {
 
         smallButton = new Dimension(100, 50);
         mediumButton = new Dimension(200, 50);
+        mappingSize = new Dimension(200, 40);
     }
 
     CalendarMainWindow() {
@@ -226,6 +227,7 @@ public class CalendarMainWindow extends JFrame {
     private JPanel setWestPanel() {
         //this is the base panel that will contain the buttons
         westPanel = new JPanel();
+        westPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         today = new JButton("Today");
         newEvent = new JButton("New Event");
@@ -252,6 +254,8 @@ public class CalendarMainWindow extends JFrame {
         westPanel.add(today);
         westPanel.add(prevNextPanel);
         westPanel.add(newEvent);
+        westPanel.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)));
+        westPanel.add(addEventTypeMap());
 
         //adding action listened to "Today" to update the main display
         today.addActionListener(new ActionListener() {
@@ -292,7 +296,73 @@ public class CalendarMainWindow extends JFrame {
             }
         });
 
+
         return westPanel;
+    }
+
+    private JPanel addEventTypeMap() {
+        JPanel mapping = new JPanel();
+        mapping.setBackground(Color.WHITE);
+        mapping.setMaximumSize(new Dimension(200,600));
+
+        mapping.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+
+        JLabel heading = new JLabel(" K E Y   M A P ");
+        heading.setForeground(Color.DARK_GRAY);
+        heading.setBackground(Color.WHITE);
+        heading.setOpaque(true);
+        heading.setHorizontalAlignment(SwingConstants.CENTER);
+        heading.setMaximumSize(mappingSize);
+        heading.setMinimumSize(mappingSize);
+        heading.setPreferredSize(mappingSize);
+
+        JLabel work = new JLabel(" W O R K ");
+        work.setOpaque(true);
+        work.setHorizontalAlignment(SwingConstants.CENTER);
+        work.setBackground(NewEventDialogue.WORK);
+        work.setMaximumSize(mappingSize);
+        work.setMinimumSize(mappingSize);
+        work.setPreferredSize(mappingSize);
+
+        JLabel family = new JLabel(" F A M I L Y ");
+        family.setOpaque(true);
+        family.setHorizontalAlignment(SwingConstants.CENTER);
+        family.setBackground(NewEventDialogue.FAMILY);
+        family.setMaximumSize(mappingSize);
+        family.setMinimumSize(mappingSize);
+        family.setPreferredSize(mappingSize);
+
+        JLabel health = new JLabel(" H E A L T H ");
+        health.setOpaque(true);
+        health.setHorizontalAlignment(SwingConstants.CENTER);
+        health.setBackground(NewEventDialogue.HEALTH);
+        health.setMaximumSize(mappingSize);
+        health.setMinimumSize(mappingSize);
+        health.setPreferredSize(mappingSize);
+
+        JLabel vacation = new JLabel(" V A C A T I O N ");
+        vacation.setOpaque(true);
+        vacation.setHorizontalAlignment(SwingConstants.CENTER);
+        vacation.setBackground(NewEventDialogue.VACATION);
+        vacation.setMaximumSize(mappingSize);
+        vacation.setMinimumSize(mappingSize);
+        vacation.setPreferredSize(mappingSize);
+
+        mapping.add(heading, gbc);
+        mapping.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)), gbc);
+        mapping.add(work, gbc);
+        mapping.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)), gbc);
+        mapping.add(vacation, gbc);
+        mapping.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)), gbc);
+        mapping.add(family, gbc);
+        mapping.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)), gbc);
+        mapping.add(health, gbc);
+        mapping.add(Box.createRigidArea(new Dimension(WEST_WIDTH, 20)), gbc);
+        mapping.setAlignmentX(CENTER_ALIGNMENT);
+        return mapping;
     }
 
     private void beautifyButtons() {

@@ -3,6 +3,7 @@ package calendar;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 public class EventDetails {
 
@@ -12,12 +13,23 @@ public class EventDetails {
     private LocalDate eventDate;
     private long timeDiff;
 
+    public Map<String, Boolean> getTypes() {
+        return types;
+    }
+
+    public void setTypes(Map<String, Boolean> types) {
+        this.types = types;
+    }
+
+    private Map<String, Boolean> types;
+
     //TODO implement checklists stuff
-    public EventDetails(String eventName, LocalTime startTime, LocalTime endTime, LocalDate eventDate) {
+    public EventDetails(String eventName, LocalTime startTime, LocalTime endTime, LocalDate eventDate, Map<String, Boolean> types) {
         this.eventName = eventName;
         this.startTime = startTime;
         setEndTime(endTime);
         this.eventDate = eventDate;
+        this.types = types;
     }
 
     public long getTimeDiff() {
@@ -64,7 +76,18 @@ public class EventDetails {
         this.eventDate = eventDate;
     }
 
+    @Override
     public String toString() {
-        return String.format("%s created for %s between %s - %s with time diff of %s", this.eventName, this.eventDate, this.startTime, this.endTime, this.timeDiff);
+        return String.format("%s on %s between %s - %s with time diff of %s and the following types checked: %s",
+                this.eventName, this.eventDate, this.startTime, this.endTime, this.timeDiff, getCheckedTypes());
+    }
+
+    public String getCheckedTypes() {
+        StringBuilder stringBuilder = new StringBuilder("");
+        for (String key : this.types.keySet()) {
+            if (this.types.get(key))
+                stringBuilder.append(key).append(" ");
+        }
+        return stringBuilder.toString();
     }
 }

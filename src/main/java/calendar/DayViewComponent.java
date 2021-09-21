@@ -126,11 +126,30 @@ public class DayViewComponent extends JComponent {
             for (int i = 0; i < numberEvents; i++) {
                 EventDetails curr = events.get(i);
                 int boxHeight = (int) curr.getStartTime().until(curr.getEndTime(), ChronoUnit.MINUTES) * TIME_BOX_HEIGHT / 60;
-                g2.setColor(new Color(255, 203, 199, 150));
+                g2.setColor(new Color(228, 235, 255, 150));
                 g2.fillRect(TIME_LINE_X0, getTimeToPosn(curr.getStartTime()), TIME_BOX_WIDTH, boxHeight);
-                g2.setColor(Color.GRAY);
+
+                String output = String.format("%s (%s - %s)", curr.getEventName(), curr.getStartTime(), curr.getEndTime());
+                drawEventTypes(g2, curr.getTypes(),
+                        TIME_LINE_X0 + 5 + fontMetrics.stringWidth(output) + TIME_LINE_PADDING,
+                        getTimeToPosn(curr.getStartTime()) + 2);
+
                 g2.setFont(timeFont);
-                g2.drawString(curr.getEventName(), TIME_LINE_X0 + 5, getTimeToPosn(curr.getStartTime()) + 13);
+                g2.setColor(Color.DARK_GRAY);
+                g2.drawString(output, TIME_LINE_X0 + 5, getTimeToPosn(curr.getStartTime()) + 13);
+            }
+        }
+    }
+
+    private void drawEventTypes(Graphics2D g2, Map<String, Boolean> types, int x, int y) {
+        int i = 1;
+        for (String key : types.keySet()) {
+            if (types.get(key)) {
+                g2.setColor(Color.WHITE);
+                g2.fillOval(x + (i * 22), y, 13, 13);
+                g2.setColor(getColor(key));
+                g2.fillOval(x + (i * 22), y + 1, 10, 10);
+                i++;
             }
         }
     }
@@ -158,7 +177,7 @@ public class DayViewComponent extends JComponent {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            if(e.getY() > LAST_LINE_Y)
+            if (e.getY() > LAST_LINE_Y)
                 return;
             logger.info(String.format("mousePressed at %s which is %s", e.getY(), getPosnToTime(e.getY())));
             if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
@@ -175,7 +194,7 @@ public class DayViewComponent extends JComponent {
         public void mouseReleased(MouseEvent e) {
             if (evt == null && isDragging && startY != e.getY()) {
                 logger.info(String.format("Creating event for points %s %s", startY, e.getY()));
-                addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate));
+                addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate, new HashMap<>()));
                 DayViewComponent.this.repaint();
             }
             isDragging = false;
@@ -223,6 +242,7 @@ public class DayViewComponent extends JComponent {
             evt.setStartTime(getPosnToTime(e.getY()));
             evt.setEndTime(evt.getStartTime().plusMinutes(evt.getTimeDiff()));
             logger.info(String.format("%s moved to %s - %s", evt.getEventName(), evt.getStartTime(), evt.getEndTime()));
+            if (evt.getTimeDiff() == 0) removeEvent(evt);
             DayViewComponent.this.repaint();
         }
     }
@@ -248,16 +268,39 @@ public class DayViewComponent extends JComponent {
     }
 
     public void addEvent(EventDetails eventDetails) {
+        if (eventDetails.getTimeDiff() == 0) return;
         if (eventsMap.containsKey(eventDetails.getEventDate().toString())) {
             eventsMap.get(eventDetails.getEventDate().toString()).add(eventDetails);
         } else {
             eventsMap.put(eventDetails.getEventDate().toString(), new ArrayList<>(Arrays.asList(eventDetails)));
         }
-        logger.info(eventDetails.toString());
+        logger.info(String.format("Created event : %s", eventDetails));
+        this.repaint();
+    }
+
+    public void removeEvent(EventDetails eventDetails) {
+        if (eventsMap.containsKey(eventDetails.getEventDate().toString())) {
+            eventsMap.get(eventDetails.getEventDate().toString()).remove(eventDetails);
+        }
+        logger.info(String.format("Removed event : %s", eventDetails));
         this.repaint();
     }
 
     public void repaintOnUpdate() {
         this.repaint();
+    }
+
+    private Color getColor(String key) {
+        switch (key) {
+            case "Work":
+                return NewEventDialogue.WORK;
+            case "Family":
+                return NewEventDialogue.FAMILY;
+            case "Vacation":
+                return NewEventDialogue.VACATION;
+            case "Health":
+                return NewEventDialogue.HEALTH;
+        }
+        return new Color(0, 0, 0, 0);
     }
 }

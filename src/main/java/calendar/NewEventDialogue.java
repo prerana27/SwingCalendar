@@ -6,6 +6,8 @@ import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static javax.swing.BoxLayout.Y_AXIS;
@@ -26,6 +28,10 @@ public class NewEventDialogue extends JDialog {
     private DayViewComponent dayViewComponent;
     private int default_h0 = 9, default_h1 = 9, default_m0 = 0, default_m1 = 30;
     private EventDetails currEvent;
+    public static final Color WORK = new Color(209, 209, 255,255);
+    public static final Color FAMILY = new Color(207, 227, 198, 255);
+    public static final Color HEALTH = new Color(255, 219, 219, 255);
+    public static final Color VACATION = new Color(255, 234, 135, 255);
 
     public void init() {
         //setting up basic stuff for the dialogue box
@@ -39,12 +45,12 @@ public class NewEventDialogue extends JDialog {
         //panel that contains all other containers
         basePanel = new JPanel();
         basePanel.setLayout(new BoxLayout(basePanel, Y_AXIS));
+        basePanel.setBackground(Color.WHITE);
 
         //adding different parts of this dialogue box
         basePanel.add(addEventDetails());
         basePanel.add(addEventTypes());
         basePanel.add(addButtons());
-        basePanel.setBackground(Color.WHITE);
 
         this.add(basePanel);
 
@@ -100,11 +106,13 @@ public class NewEventDialogue extends JDialog {
     private JPanel addEventDetails() {
         eventDetails = new JPanel();
         eventDetails.setLayout(new BoxLayout(eventDetails, Y_AXIS));
+        eventDetails.setBackground(Color.WHITE);
 
         //this adds a label and a text field to a new panel to ensure Flow Layout
         JPanel namePanel = new JPanel();
+        namePanel.setBackground(Color.WHITE);
         nameLabel = new JLabel("Name:");
-        nameLabel.setMaximumSize(labelSize);
+        nameLabel.setMinimumSize(labelSize);
         nameText = new JTextField(getNameToUse(), TEXT_LEN);
         nameText.setForeground(Color.GRAY);
         namePanel.add(nameLabel);
@@ -112,8 +120,9 @@ public class NewEventDialogue extends JDialog {
 
         //this adds a label and a text field to a new panel to ensure Flow Layout
         JPanel datePanel = new JPanel();
+        datePanel.setBackground(Color.WHITE);
         dateLable = new JLabel("Date:");
-        dateLable.setMaximumSize(labelSize);
+        dateLable.setMinimumSize(labelSize);
         dateText = new JTextField(this.date.toString(), TEXT_LEN);
         dateText.setForeground(Color.GRAY);
         datePanel.add(dateLable);
@@ -121,8 +130,9 @@ public class NewEventDialogue extends JDialog {
 
         //this adds a label and a JSpinner to a new panel to ensure Flow Layout
         JPanel startPanel = new JPanel();
+        startPanel.setBackground(Color.WHITE);
         startLabel = new JLabel("Start Time :");
-        startLabel.setMaximumSize(labelSize);
+        startLabel.setMinimumSize(labelSize);
         startPanel.add(startLabel);
 
         //spinners to select start hour and minute
@@ -134,8 +144,9 @@ public class NewEventDialogue extends JDialog {
 
         //this adds a label and a JSpinner to a new panel to ensure Flow Layout
         JPanel endPanel = new JPanel();
+        endPanel.setBackground(Color.WHITE);
         endLabel = new JLabel("End Time :");
-        endLabel.setMaximumSize(labelSize);
+        endLabel.setMinimumSize(labelSize);
         endPanel.add(endLabel);
 
         //spinners to select start hour and minute
@@ -209,6 +220,9 @@ public class NewEventDialogue extends JDialog {
                     display = String.format(s, health.getText(), isSelected);
                 }
                 logger.info(display);
+
+                if(currEvent!=null)
+                    updateTypesMap(currEvent.getTypes());
             }
         };
 
@@ -221,11 +235,23 @@ public class NewEventDialogue extends JDialog {
     //this adds the panel with the event type checkboxes
     private JPanel addEventTypes() {
         eventType = new JPanel();
+        eventType.setBackground(Color.WHITE);
 
         work = new JCheckBox("Work");
+        work.setOpaque(true); work.setBackground(WORK);
         family = new JCheckBox("Family");
+        family.setOpaque(true); family.setBackground(FAMILY);
         vacation = new JCheckBox("Vacation");
+        vacation.setOpaque(true); vacation.setBackground(VACATION);
         health = new JCheckBox("Health");
+        health.setOpaque(true); health.setBackground(HEALTH);
+
+        if(this.currEvent!=null){
+            work.setSelected(currEvent.getTypes().get(work.getText()));
+            family.setSelected(currEvent.getTypes().get(family.getText()));
+            vacation.setSelected(currEvent.getTypes().get(vacation.getText()));
+            health.setSelected(currEvent.getTypes().get(health.getText()));
+        }
 
         addCheckboxListener();
 
@@ -239,6 +265,7 @@ public class NewEventDialogue extends JDialog {
 
     private JPanel addButtons() {
         buttonsPanel = new JPanel();
+        buttonsPanel.setBackground(Color.WHITE);
 
         save = new JButton("Save");
         cancel = new JButton("Cancel");
@@ -257,13 +284,16 @@ public class NewEventDialogue extends JDialog {
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                Map<String, Boolean> map = new HashMap<>();
+                updateTypesMap(map);
+
                 if (currEvent != null) {
                     currEvent.setStartTime(getTime(true));
                     currEvent.setEndTime(getTime(false));
                     currEvent.setEventName(nameText.getText());
                     dayViewComponent.repaintOnUpdate();
                 } else {
-                    dayViewComponent.addEvent(new EventDetails(nameText.getText(), getTime(true), getTime(false), LocalDate.parse(dateText.getText())));
+                    dayViewComponent.addEvent(new EventDetails(nameText.getText(), getTime(true), getTime(false), LocalDate.parse(dateText.getText()), map));
                 }
                 NewEventDialogue.super.dispose();
             }
@@ -296,4 +326,12 @@ public class NewEventDialogue extends JDialog {
     private String getNameToUse() {
         return (this.eventName == null || this.eventName.isEmpty() ? DEFAULT_NAME : this.eventName);
     }
+
+    private void updateTypesMap(Map<String, Boolean> map){
+        map.put(work.getText(), work.isSelected());
+        map.put(family.getText(), family.isSelected());
+        map.put(vacation.getText(), vacation.isSelected());
+        map.put(health.getText(), health.isSelected());
+    }
+
 }
