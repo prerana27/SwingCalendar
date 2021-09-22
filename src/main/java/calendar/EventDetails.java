@@ -14,6 +14,16 @@ public class EventDetails {
     private LocalDate eventDate;
     private long timeDiff;
 
+    public boolean isDragged() {
+        return isDragged;
+    }
+
+    public void setDragged(boolean dragged) {
+        isDragged = dragged;
+    }
+
+    private boolean isDragged;
+
     public Map<String, Boolean> getTypes() {
         return types;
     }

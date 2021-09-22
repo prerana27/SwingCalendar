@@ -126,8 +126,13 @@ public class DayViewComponent extends JComponent {
             for (int i = 0; i < numberEvents; i++) {
                 EventDetails curr = events.get(i);
                 int boxHeight = (int) curr.getStartTime().until(curr.getEndTime(), ChronoUnit.MINUTES) * TIME_BOX_HEIGHT / 60;
-                g2.setColor(new Color(228, 235, 255, 150));
-                g2.fillRect(TIME_LINE_X0, getTimeToPosn(curr.getStartTime()), TIME_BOX_WIDTH, boxHeight);
+
+                if (curr.isDragged())
+                    g2.setColor(new Color(226, 226, 226, 150));
+                else
+                    g2.setColor(new Color(228, 235, 255, 150));
+
+                g2.fillRoundRect(TIME_LINE_X0, getTimeToPosn(curr.getStartTime()), TIME_BOX_WIDTH, boxHeight, 10, 10);
 
                 String output = String.format("%s (%s - %s)", curr.getEventName(), curr.getStartTime(), curr.getEndTime());
                 drawEventTypes(g2, curr.getTypes(),
@@ -198,7 +203,9 @@ public class DayViewComponent extends JComponent {
                 DayViewComponent.this.repaint();
             }
             isDragging = false;
+            evt.setDragged(false);
             evt = null;
+            DayViewComponent.this.repaint();
         }
 
         @Override
@@ -221,6 +228,7 @@ public class DayViewComponent extends JComponent {
                 evt = checkForEvent(e);
                 isDragging = true;
                 updateEvent(e);
+                evt.setDragged(true);
             }
 
             if (evt != null && isDragging) {
