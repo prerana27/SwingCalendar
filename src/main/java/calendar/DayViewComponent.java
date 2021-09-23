@@ -29,10 +29,11 @@ public class DayViewComponent extends JComponent {
     private static final int TIME_LINE_PADDING = 4;
     public static final double MINUTE_GRANULARITY = 15.0;
     private static final int LAST_LINE_Y = HEADER_Y1 + 24 * TIME_BOX_HEIGHT;
+    private static final Color DRAG_FILL = new Color(226, 226, 226, 150);
     private boolean isDragging = false;
     private DateTimeFormatter dateMonthFormat, dayFormat;
     private EventDetails evt = null;
-    private int startY;
+    private int startY, endY = -1;
 
     public LocalDate getCurrentDate() {
         return currentDate;
@@ -92,6 +93,7 @@ public class DayViewComponent extends JComponent {
         drawDayDivision(g);
         drawCurrentTime(g);
         drawEvents(g);
+        drawDragFeedback(g);
     }
 
     private void drawDate(Graphics g) {
@@ -143,7 +145,7 @@ public class DayViewComponent extends JComponent {
                 int boxHeight = (int) curr.getStartTime().until(curr.getEndTime(), ChronoUnit.MINUTES) * TIME_BOX_HEIGHT / 60;
 
                 if (curr.isDragged())
-                    g2.setColor(new Color(226, 226, 226, 150));
+                    g2.setColor(DRAG_FILL);
                 else
                     g2.setColor(new Color(228, 235, 255, 150));
 
@@ -172,6 +174,15 @@ public class DayViewComponent extends JComponent {
                 i++;
             }
         }
+    }
+
+    private void drawDragFeedback(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        if (isDragging && endY>=0 && endY > startY) {
+            g2.setColor(DRAG_FILL);
+            g2.fillRoundRect(TIME_LINE_X0, startY, TIME_BOX_WIDTH, endY - startY, 10, 10);
+        }
+
     }
 
     public LocalTime getPosnToTime(int y) {
@@ -222,6 +233,7 @@ public class DayViewComponent extends JComponent {
             if (evt != null)
                 evt.setDragged(false);
             evt = null;
+            endY = -1;
             DayViewComponent.this.repaint();
         }
 
@@ -246,15 +258,14 @@ public class DayViewComponent extends JComponent {
                 isDragging = true;
                 updateEvent(e);
                 evt.setDragged(true);
-            }
-
-            if (evt != null && isDragging) {
+            } else if (evt != null && isDragging) {
                 updateEvent(e);
-            }
-
-            if (evt == null && !isDragging) {
+            } else if (evt == null && !isDragging) {
                 startY = e.getY();
                 isDragging = true;
+            } else if (evt == null && isDragging) {
+                endY = e.getY();
+                repaintOnUpdate();
             }
         }
 
