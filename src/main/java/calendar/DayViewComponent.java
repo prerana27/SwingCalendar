@@ -30,7 +30,7 @@ public class DayViewComponent extends JComponent {
     public static final double MINUTE_GRANULARITY = 15.0;
     private static final int LAST_LINE_Y = HEADER_Y1 + 24 * TIME_BOX_HEIGHT;
     private static final Color DRAG_FILL = new Color(226, 226, 226, 150);
-    private boolean isDragging = false;
+    private boolean isDragging = false, newEvent = false;
     private DateTimeFormatter dateMonthFormat, dayFormat;
     private EventDetails evt = null;
     private int startY, endY = -1;
@@ -151,16 +151,21 @@ public class DayViewComponent extends JComponent {
 
                 g2.fillRoundRect(TIME_LINE_X0, getTimeToPosn(curr.getStartTime()), TIME_BOX_WIDTH, boxHeight, 10, 10);
 
-                String output = String.format("%s (%s - %s)", curr.getEventName(), curr.getStartTime(), curr.getEndTime());
-                drawEventTypes(g2, curr.getTypes(),
-                        TIME_LINE_X0 + 5 + fontMetrics.stringWidth(output) + TIME_LINE_PADDING,
-                        getTimeToPosn(curr.getStartTime()) + 2);
+                int output = drawEventTitle(g2, curr.getEventName(), curr.getStartTime(), curr.getEndTime());
 
-                g2.setFont(timeFont);
-                g2.setColor(Color.DARK_GRAY);
-                g2.drawString(output, TIME_LINE_X0 + 5, getTimeToPosn(curr.getStartTime()) + 13);
+                drawEventTypes(g2, curr.getTypes(),
+                        TIME_LINE_X0 + 5 + output + TIME_LINE_PADDING,
+                        getTimeToPosn(curr.getStartTime()) + 2);
             }
         }
+    }
+
+    private int drawEventTitle(Graphics2D g2, String name, LocalTime start, LocalTime end) {
+        String output = String.format("%s (%s - %s)", name, start, end);
+        g2.setFont(timeFont);
+        g2.setColor(Color.DARK_GRAY);
+        g2.drawString(output, TIME_LINE_X0 + 5, getTimeToPosn(start) + 13);
+        return fontMetrics.stringWidth(output);
     }
 
     private void drawEventTypes(Graphics2D g2, Map<String, Boolean> types, int x, int y) {
@@ -178,9 +183,10 @@ public class DayViewComponent extends JComponent {
 
     private void drawDragFeedback(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        if (isDragging && endY>=0 && endY > startY) {
+        if (isDragging && endY >= 0 && endY > startY) {
             g2.setColor(DRAG_FILL);
-            g2.fillRoundRect(TIME_LINE_X0, startY, TIME_BOX_WIDTH, endY - startY, 10, 10);
+            g2.fillRoundRect(TIME_LINE_X0, getTimeToPosn(getPosnToTime(startY)), TIME_BOX_WIDTH, endY - startY, 10, 10);
+            drawEventTitle(g2, NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(endY));
         }
 
     }
@@ -230,6 +236,7 @@ public class DayViewComponent extends JComponent {
                 DayViewComponent.this.repaint();
             }
             isDragging = false;
+            newEvent = false;
             if (evt != null)
                 evt.setDragged(false);
             evt = null;
@@ -253,7 +260,7 @@ public class DayViewComponent extends JComponent {
         @Override
         public void mouseDragged(MouseEvent e) {
             logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
-            if (evt == null && checkForEvent(e) != null) {
+            if (evt == null && checkForEvent(e) != null && !newEvent) {
                 evt = checkForEvent(e);
                 isDragging = true;
                 updateEvent(e);
@@ -265,6 +272,7 @@ public class DayViewComponent extends JComponent {
                 isDragging = true;
             } else if (evt == null && isDragging) {
                 endY = e.getY();
+                newEvent = true;
                 repaintOnUpdate();
             }
         }
