@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.*;
@@ -15,8 +16,8 @@ public class DayViewComponent extends JComponent {
 
     private static final int LEFT_PADDING_X0 = 20;
     private static final int HEADER_Y0 = 10;
-    private static final int HEADER_HEIGHT = 30;
-    private static final int HEADER_Y1 = HEADER_Y0 + HEADER_HEIGHT;
+    private static final int HEADER_HEIGHT = 60;
+    private static int HEADER_Y1;
     private static final int COMPONENT_WIDTH = 800;
     private static final int COMPONENT_HEIGHT = 600;
     private static final int COMPONENT_MAX_HEIGHT = 1500;
@@ -29,6 +30,7 @@ public class DayViewComponent extends JComponent {
     public static final double MINUTE_GRANULARITY = 15.0;
     private static final int LAST_LINE_Y = HEADER_Y1 + 24 * TIME_BOX_HEIGHT;
     private boolean isDragging = false;
+    private DateTimeFormatter dateMonthFormat, dayFormat;
     private EventDetails evt = null;
     private int startY;
 
@@ -56,7 +58,7 @@ public class DayViewComponent extends JComponent {
     }
 
     private LocalDate currentDate;
-    private Font timeFont;
+    private Font timeFont, headingFont;
     private int maxWidthTime;
     private FontMetrics fontMetrics;
     private LocalTime START_TIME = LocalTime.of(0, 0);
@@ -65,9 +67,13 @@ public class DayViewComponent extends JComponent {
     DayViewComponent(LocalDate localDate, Map<String, List<EventDetails>> eventsMap) {
         this.currentDate = LocalDate.now();
         this.eventsMap = eventsMap;
+        dateMonthFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
+        dayFormat = DateTimeFormatter.ofPattern("EEEE");
         timeFont = new Font("SansSerif", Font.PLAIN, 13);
+        headingFont = new Font("SansSerif", Font.BOLD, 26);
         fontMetrics = getFontMetrics(timeFont);
         maxWidthTime = fontMetrics.stringWidth("08:00") + 20;
+        HEADER_Y1 = HEADER_Y0 + HEADER_HEIGHT + 2 * getFontMetrics(headingFont).getHeight();
         TIME_LINE_X0 = TIME_X0 + maxWidthTime;
         TIME_BOX_WIDTH = TIME_LINE_X1 - TIME_LINE_X0;
 
@@ -82,9 +88,18 @@ public class DayViewComponent extends JComponent {
     @Override
     public void paintComponent(Graphics g) {
         drawWhiteBackground(g);
+        drawDate(g);
         drawDayDivision(g);
         drawCurrentTime(g);
         drawEvents(g);
+    }
+
+    private void drawDate(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setFont(headingFont);
+        g2.setColor(Color.BLACK);
+        g2.drawString(this.currentDate.format(dateMonthFormat), TIME_X0, HEADER_Y0 + getFontMetrics(headingFont).getHeight());
+        g2.drawString(this.currentDate.format(dayFormat), TIME_X0, HEADER_Y0 + 2 * getFontMetrics(headingFont).getHeight());
     }
 
     private void drawWhiteBackground(Graphics g) {
@@ -165,6 +180,7 @@ public class DayViewComponent extends JComponent {
         int hour = ((y - HEADER_Y1) / TIME_BOX_HEIGHT) % 24;
         int min = ((y - HEADER_Y1 - (hour * TIME_BOX_HEIGHT)) * 60 / TIME_BOX_HEIGHT) % 60;
         if (min < 0) min = 0;
+        if (hour < 0) hour = 0;
         LocalTime time = roundMinutes(LocalTime.of(hour, min));
         logger.info(String.format("%s converts to %s", y, time.toString()));
         return time;
@@ -197,13 +213,14 @@ public class DayViewComponent extends JComponent {
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            if (evt == null && isDragging && startY != e.getY()) {
+            if (evt == null && isDragging && e.getY() > startY) {
                 logger.info(String.format("Creating event for points %s %s", startY, e.getY()));
                 addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate));
                 DayViewComponent.this.repaint();
             }
             isDragging = false;
-            evt.setDragged(false);
+            if (evt != null)
+                evt.setDragged(false);
             evt = null;
             DayViewComponent.this.repaint();
         }

@@ -405,6 +405,7 @@ public class CalendarMainWindow extends JFrame {
         selectedView.setFont(new Font("SansSerif", Font.PLAIN, 18));
         selectedView.setForeground(Color.GRAY);
         selectedView.setAlignmentX(Component.LEFT_ALIGNMENT);
+        selectedView.setHorizontalTextPosition(SwingConstants.LEFT);
 
         //label to display either day view date ot month view month
         displayDate = new JLabel();
@@ -443,7 +444,8 @@ public class CalendarMainWindow extends JFrame {
         logger.info(String.format("Updating date display.. current date being displayed is: %s, and day view  is: %s", date, isDayViewSelected()));
 
         displayDay.setText(date.format(dayFormat));
-        displayDay.setVisible(isDayViewSelected());
+        displayDay.setVisible(false);
+        displayDate.setVisible(!isDayViewSelected());
         dayViewScrollPane.setVisible(isDayViewSelected());
 
         //using the boolean from radio buttons to determine what labels to show and what date format to use
