@@ -293,6 +293,18 @@ public class NewEventDialogue extends JDialog {
                     currEvent.setEndTime(getTime(false));
                     currEvent.setEventName(nameText.getText());
                     updateTypesMap(currEvent.getTypes());
+
+                    if(!dayViewComponent.getCurrentDate().toString().equals(dateText.getText())){
+                        dayViewComponent.removeEvent(currEvent);
+                        try{
+                            LocalDate newDate = LocalDate.parse(dateText.getText());
+                            currEvent.setEventDate(newDate);
+                        }catch (Exception exception){
+                            logger.info(exception.getMessage());
+                            dateText.setText(dayViewComponent.getCurrentDate().toString());
+                        }
+                        dayViewComponent.addEvent(currEvent);
+                    }
                     dayViewComponent.repaintOnUpdate();
                 } else {
                     EventDetails tmp = new EventDetails(nameText.getText(), getTime(true), getTime(false), LocalDate.parse(dateText.getText()));
