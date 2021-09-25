@@ -20,7 +20,7 @@ public class DayViewComponent extends JComponent {
     private static int HEADER_Y1;
     private static final int COMPONENT_WIDTH = 800;
     private static final int COMPONENT_HEIGHT = 600;
-    private static final int COMPONENT_MAX_HEIGHT = 1500;
+    private static final int COMPONENT_MAX_HEIGHT = 1600;
     private static final int TIME_X0 = LEFT_PADDING_X0 + 10;
     private static final int TIME_LINE_X1 = COMPONENT_WIDTH - 2 * LEFT_PADDING_X0;
     private static final int TIME_BOX_HEIGHT = 60;
@@ -28,7 +28,7 @@ public class DayViewComponent extends JComponent {
     private static int TIME_LINE_X0;
     private static final int TIME_LINE_PADDING = 4;
     public static final double MINUTE_GRANULARITY = 15.0;
-    private static final int LAST_LINE_Y = HEADER_Y1 + 24 * TIME_BOX_HEIGHT;
+    private static int LAST_LINE_Y;
     private static final Color DRAG_FILL = new Color(226, 226, 226, 150);
     private boolean isDragging = false, newEvent = false;
     private DateTimeFormatter dateMonthFormat, dayFormat;
@@ -77,6 +77,8 @@ public class DayViewComponent extends JComponent {
         HEADER_Y1 = HEADER_Y0 + HEADER_HEIGHT + 2 * getFontMetrics(headingFont).getHeight();
         TIME_LINE_X0 = TIME_X0 + maxWidthTime;
         TIME_BOX_WIDTH = TIME_LINE_X1 - TIME_LINE_X0;
+        LAST_LINE_Y = HEADER_Y1 + 24 * TIME_BOX_HEIGHT;
+
 
         addMouseListener(new ClickListener());
         addMouseMotionListener(new DragListener());
@@ -88,12 +90,12 @@ public class DayViewComponent extends JComponent {
 
     @Override
     public void paintComponent(Graphics g) {
-        drawWhiteBackground(g);
-        drawDate(g);
-        drawDayDivision(g);
-        drawCurrentTime(g);
-        drawEvents(g);
-        drawDragFeedback(g);
+        drawWhiteBackground(g);     //first draw the white background for the component
+        drawDate(g);                //draw current day string onto the component
+        drawDayDivision(g);         //draw the lines and time for each hour of the day
+        drawCurrentTime(g);         //draw the red line that shows the current time
+        drawEvents(g);              //draw all the events
+        drawDragFeedback(g);        //if there is a drag, draw events in gray color to show they are being dragged
     }
 
     private void drawDate(Graphics g) {
@@ -128,6 +130,8 @@ public class DayViewComponent extends JComponent {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.RED);
         int y = getTimeToPosn(LocalTime.now());
+        String time = String.format("%s:%s", LocalTime.now().getHour(), LocalTime.now().getMinute());
+        g2.drawString(time, TIME_X0, y);
         g2.drawLine(TIME_X0 + maxWidthTime, y, TIME_LINE_X1, y);
     }
 
