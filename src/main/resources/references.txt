@@ -15,7 +15,7 @@ Note:
         set the minute spinner back to 0, and
         increase the hour spinner by 1
 
-2.  I also have not included a check for text edit option into the Jspinner
+2.  I have not included a check for text edit option into the Jspinner
 
 
 Extra Credit:
@@ -43,3 +43,4 @@ https://learning.oreilly.com/library/view/learning-java-4th/9781449372477/ch18s0
 https://docs.oracle.com/javase/tutorial/uiswing/events/mouselistener.html
 https://docs.oracle.com/javase/tutorial/uiswing/events/mousemotionlistener.html
 https://docs.oracle.com/javase/7/docs/api/java/awt/Graphics2D.html
+https://docs.oracle.com/javase/7/docs/api/javax/swing/Timer.html

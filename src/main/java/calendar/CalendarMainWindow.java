@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,7 +90,13 @@ public class CalendarMainWindow extends JFrame {
     }
 
     private void setCurrentTime() {
-        Timer timer = new Timer(1000 * 60, e -> repaint());
+        Timer timer = new Timer(1000 * 60, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(LocalTime.now().getSecond() == 0)
+                    dayViewComponent.repaintOnUpdate();
+            }
+        });
         timer.start();
     }
 
