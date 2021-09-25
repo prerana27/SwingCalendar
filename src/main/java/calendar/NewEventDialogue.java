@@ -74,6 +74,7 @@ public class NewEventDialogue extends JDialog {
         addPanel();
     }
 
+    //this is used when w new dialogue box is opened for an existing event - hence we already have an eventDetails object
     NewEventDialogue(DayViewComponent dayViewComponent, EventDetails eventDetails) {
         this.dayViewComponent = dayViewComponent;
         this.currEvent = eventDetails;
@@ -88,6 +89,7 @@ public class NewEventDialogue extends JDialog {
         updateTypesMap(eventDetails.getTypes());
     }
 
+    //this is used to set the time and stuff when the user double clicks on empty space to create a new event
     NewEventDialogue(DayViewComponent dayViewComponent, LocalTime start) {
         this.dayViewComponent = dayViewComponent;
         this.default_h0 = start.getHour();
@@ -315,6 +317,7 @@ public class NewEventDialogue extends JDialog {
             }
         });
 
+        //this button removes an event from the events map
         delete.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -343,6 +346,7 @@ public class NewEventDialogue extends JDialog {
         return (this.eventName == null || this.eventName.isEmpty() ? DEFAULT_NAME : this.eventName);
     }
 
+    //utility to update the map of event types and see which one is checked
     private void updateTypesMap(Map<String, Boolean> map) {
         map.put(work.getText(), work.isSelected());
         map.put(family.getText(), family.isSelected());

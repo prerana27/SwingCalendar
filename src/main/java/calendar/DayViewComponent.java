@@ -45,6 +45,7 @@ public class DayViewComponent extends JComponent {
         return this.currentDate;
     }
 
+    //API for other classes to update the date - so we can repaint whenever there is a change
     public LocalDate updateDate(boolean isDayView, boolean isIncrease) {
         if (isDayView && isIncrease)
             this.currentDate = this.currentDate.plusDays(1);
@@ -79,7 +80,7 @@ public class DayViewComponent extends JComponent {
         TIME_BOX_WIDTH = TIME_LINE_X1 - TIME_LINE_X0;
         LAST_LINE_Y = HEADER_Y1 + 24 * TIME_BOX_HEIGHT;
 
-
+        //adding mouse listeners!
         addMouseListener(new ClickListener());
         addMouseMotionListener(new DragListener());
 
@@ -106,11 +107,13 @@ public class DayViewComponent extends JComponent {
         g2.drawString(this.currentDate.format(dayFormat), TIME_X0, HEADER_Y0 + 2 * getFontMetrics(headingFont).getHeight());
     }
 
+    //first draw the white background for the component
     private void drawWhiteBackground(Graphics g) {
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, getWidth(), getHeight());
     }
 
+    //this draws the line and time for each hour of the day
     private void drawDayDivision(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(new Color(212, 212, 212, 150));
@@ -126,6 +129,7 @@ public class DayViewComponent extends JComponent {
 
     }
 
+    //the red line that corresponds to the current time is drawn here
     private void drawCurrentTime(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.RED);
@@ -148,6 +152,7 @@ public class DayViewComponent extends JComponent {
                 EventDetails curr = events.get(i);
                 int boxHeight = (int) curr.getStartTime().until(curr.getEndTime(), ChronoUnit.MINUTES) * TIME_BOX_HEIGHT / 60;
 
+                //changing fill color based on whether it is being dragged
                 if (curr.isDragged())
                     g2.setColor(DRAG_FILL);
                 else
@@ -156,7 +161,6 @@ public class DayViewComponent extends JComponent {
                 g2.fillRoundRect(TIME_LINE_X0, getTimeToPosn(curr.getStartTime()), TIME_BOX_WIDTH, boxHeight, 10, 10);
 
                 int output = drawEventTitle(g2, curr.getEventName(), curr.getStartTime(), curr.getEndTime());
-
                 drawEventTypes(g2, curr.getTypes(),
                         TIME_LINE_X0 + 5 + output + TIME_LINE_PADDING,
                         getTimeToPosn(curr.getStartTime()) + 2);
@@ -164,6 +168,7 @@ public class DayViewComponent extends JComponent {
         }
     }
 
+    //draws string to show the event name and times for a given event
     private int drawEventTitle(Graphics2D g2, String name, LocalTime start, LocalTime end) {
         String output = String.format("%s (%s - %s)", name, start, end);
         g2.setFont(timeFont);
@@ -172,6 +177,7 @@ public class DayViewComponent extends JComponent {
         return fontMetrics.stringWidth(output);
     }
 
+    //draws tiny circles and paints them according to the color of the selected event type for a given event
     private void drawEventTypes(Graphics2D g2, Map<String, Boolean> types, int x, int y) {
         int i = 1;
         for (String key : types.keySet()) {
@@ -185,6 +191,7 @@ public class DayViewComponent extends JComponent {
         }
     }
 
+    //draws event as it is being dragged for creation to give feedback to the user
     private void drawDragFeedback(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         if (isDragging && endY >= 0 && endY > startY) {
@@ -195,18 +202,26 @@ public class DayViewComponent extends JComponent {
 
     }
 
+    //utility that converts a ycoordinate to the relevant time of the day
     public LocalTime getPosnToTime(int y) {
+        //take care of edge case where click was beyond the last line
         if (y > LAST_LINE_Y)
             return LocalTime.of(23, 59);
+
         int hour = ((y - HEADER_Y1) / TIME_BOX_HEIGHT) % 24;
         int min = ((y - HEADER_Y1 - (hour * TIME_BOX_HEIGHT)) * 60 / TIME_BOX_HEIGHT) % 60;
+
+        //take case of edge case where click was before the first line
         if (min < 0) min = 0;
         if (hour < 0) hour = 0;
+
+        //now we round off the time to the near multiple of 15min since the granularity is 15min for this calendar
         LocalTime time = roundMinutes(LocalTime.of(hour, min));
         logger.info(String.format("%s converts to %s", y, time.toString()));
         return time;
     }
 
+    //utility that converts a time to a y coordinate on the component
     public int getTimeToPosn(LocalTime time) {
         return HEADER_Y1 + time.getHour() * TIME_BOX_HEIGHT + (60 * time.getMinute() / TIME_BOX_HEIGHT);
     }
@@ -217,6 +232,7 @@ public class DayViewComponent extends JComponent {
 
         }
 
+        //this is the method that takes care of the double clicks
         @Override
         public void mousePressed(MouseEvent e) {
             if (e.getY() > LAST_LINE_Y)
@@ -232,13 +248,17 @@ public class DayViewComponent extends JComponent {
         }
 
 
+        //this method is used to identify when a "Drag" is over and what action to perform
         @Override
         public void mouseReleased(MouseEvent e) {
+            //creating new event
             if (evt == null && isDragging && e.getY() > startY) {
                 logger.info(String.format("Creating event for points %s %s", startY, e.getY()));
                 addEvent(new EventDetails(NewEventDialogue.DEFAULT_NAME, getPosnToTime(startY), getPosnToTime(e.getY()), currentDate));
                 DayViewComponent.this.repaint();
             }
+
+            //resetting state of drag to indicate that a drag has not started
             isDragging = false;
             newEvent = false;
             if (evt != null)
@@ -261,20 +281,22 @@ public class DayViewComponent extends JComponent {
 
     private class DragListener implements MouseMotionListener {
 
+        //this method initiates the drag
         @Override
         public void mouseDragged(MouseEvent e) {
             logger.info(String.format("mouseDragged at %s which is %s", e.getY(), getPosnToTime(e.getY())));
+            //this condition is when an event is found below the drag coordinated so we select it to be dragged around
             if (evt == null && checkForEvent(e) != null && !newEvent) {
                 evt = checkForEvent(e);
                 isDragging = true;
                 updateEvent(e);
                 evt.setDragged(true);
-            } else if (evt != null && isDragging) {
+            } else if (evt != null && isDragging) { //this moves an identified event around based on the mouse location
                 updateEvent(e);
-            } else if (evt == null && !isDragging) {
+            } else if (evt == null && !isDragging) { //this marks the start of a drag to create a new event
                 startY = e.getY();
                 isDragging = true;
-            } else if (evt == null && isDragging) {
+            } else if (evt == null && isDragging) { //this is the case when drag is happening to create a new event
                 endY = e.getY();
                 newEvent = true;
                 repaintOnUpdate();
@@ -286,6 +308,7 @@ public class DayViewComponent extends JComponent {
 
         }
 
+        //this just updates the start and end time of an event based on the drag and requests a repaint
         public void updateEvent(MouseEvent e) {
             evt.setStartTime(getPosnToTime(e.getY()));
             evt.setEndTime(evt.getStartTime().plusMinutes(evt.getTimeDiff()));
@@ -295,11 +318,13 @@ public class DayViewComponent extends JComponent {
         }
     }
 
+    //rounds off the time to the nearest 15min multiple
     public LocalTime roundMinutes(LocalTime time) {
         int mod = (int) (time.getMinute() % MINUTE_GRANULARITY);
         return time.plusMinutes(mod < 8 ? -mod : (15 - mod));
     }
 
+    //this checks if there an event present under the mouse coordinates given
     public EventDetails checkForEvent(MouseEvent e) {
         if (!eventsMap.containsKey(this.currentDate.toString())) return null;
 
@@ -315,6 +340,7 @@ public class DayViewComponent extends JComponent {
         return null;
     }
 
+    //API to add a new event to our eventsMap
     public void addEvent(EventDetails eventDetails) {
         if (eventDetails.getTimeDiff() == 0) return;
         if (eventsMap.containsKey(eventDetails.getEventDate().toString())) {
@@ -326,6 +352,7 @@ public class DayViewComponent extends JComponent {
         this.repaint();
     }
 
+    //API to delete an event from our eventMap
     public void removeEvent(EventDetails eventDetails) {
         if (eventsMap.containsKey(eventDetails.getEventDate().toString())) {
             eventsMap.get(eventDetails.getEventDate().toString()).remove(eventDetails);
@@ -338,6 +365,7 @@ public class DayViewComponent extends JComponent {
         this.repaint();
     }
 
+    //utility to fetch the right color for each event type
     private Color getColor(String key) {
         switch (key) {
             case "Work":

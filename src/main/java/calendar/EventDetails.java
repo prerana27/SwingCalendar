@@ -34,7 +34,6 @@ public class EventDetails {
 
     private Map<String, Boolean> types;
 
-    //TODO implement checklists stuff
     public EventDetails(String eventName, LocalTime startTime, LocalTime endTime, LocalDate eventDate) {
         this.eventName = eventName;
         this.startTime = startTime;
@@ -71,6 +70,9 @@ public class EventDetails {
         return endTime;
     }
 
+    //had to do this because there are two y coordinates that map to the time 00:00
+    //and if the event is form 11pm to 12 am .. the time difference is negative and the event gets drawn wrong
+    //so we just set the end time to 23:59
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
         if (startTime.until(endTime, ChronoUnit.MINUTES) < 0) {
