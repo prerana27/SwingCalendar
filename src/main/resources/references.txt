@@ -1,2 +1,45 @@
+Kalose Ramamanohar, Prerana
+pramamanohar3@gatech.edu
+
+Java Version Output:
+------------------------------
+$ java -version
+java version "16.0.2" 2021-07-20
+Java(TM) SE Runtime Environment (build 16.0.2+7-67)
+Java HotSpot(TM) 64-Bit Server VM (build 16.0.2+7-67, mixed mode, sharing)
+
+Note:
+
+1.  the time Jspinners don't roll over once they reach max limit
+    so to change the time from 3:45 to 4:00 requires you to
+        set the minute spinner back to 0, and
+        increase the hour spinner by 1
+
+2.  I also have not included a check for text edit option into the Jspinner
+
+
+Extra Credit:
+------------------------------
+1. Added a red line that indicated the current time, and gets updated every minute.
+
+2. Made the events display as a rectangle with rounded corners and a translucent look
+
+3. Displayed event type tags next to the event name as small colored circles. These update as and when the user edits the event types for any event
+
+4. Gray out event when they are being dragged to a new time.
+Also show a gray event being drawn that changes whenever the user drags to create a new event, and turns into a normal blue colored event once saved
+
+5. Events when dragged "snap" into place with the nearest 15min start time .. i.e start time automatically changes to multiples of 15min when moved aroud.
+Same logic applies for new events created via dragging
+
+6. Added a "delete event" button that only appears for existing events, which removes the event from the hashmap and hence from the calendar day view.
+
+7. Clicks/drag before the first 00:00 line are considered as start time =  00:00, and those beyond the 00:00 line at the end of the day automatically get adjusted to an end time of 23:59
+
+Reference used:
+------------------------------
 https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html
 https://learning.oreilly.com/library/view/learning-java-4th/9781449372477/ch18s06.html#learnjava3-CHP-18-SECT-6.2
+https://docs.oracle.com/javase/tutorial/uiswing/events/mouselistener.html
+https://docs.oracle.com/javase/tutorial/uiswing/events/mousemotionlistener.html
+https://docs.oracle.com/javase/7/docs/api/java/awt/Graphics2D.html
