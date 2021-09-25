@@ -134,7 +134,7 @@ public class DayViewComponent extends JComponent {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.RED);
         int y = getTimeToPosn(LocalTime.now());
-        String time = String.format("%s:%s", LocalTime.now().getHour(), LocalTime.now().getMinute());
+        String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
         g2.drawString(time, TIME_X0, y);
         g2.drawLine(TIME_X0 + maxWidthTime, y, TIME_LINE_X1, y);
     }
